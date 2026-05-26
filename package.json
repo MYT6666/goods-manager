@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@cloudbase/adapter-uni-app": "^1.1.0",
-    "@cloudbase/js-sdk": "^2.27.2"
+    "@cloudbase/js-sdk": "^2.27.2",
+    "@dcloudio/uni-ui": "^1.5.12"
   }
 }

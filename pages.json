@@ -1,5 +1,5 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
 		{
 			"path": "pages/login/login",
 			"style": {
@@ -15,25 +15,36 @@
 		{
 			"path": "pages/goods/goods",
 			"style": {
-				"navigationBarTitleText": "商品"
+				"navigationBarTitleText": "商品",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/add/add",
 			"style": {
-				"navigationBarTitleText": "新增商品"
+				"navigationBarTitleText": "新增商品",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/checkout/checkout",
+			"style": {
+				"navigationBarTitleText": "购物车",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/profile/profile",
 			"style": {
-				"navigationBarTitleText": "我的"
+				"navigationBarTitleText": "我的",
+				"navigationStyle": "custom"
 			}
 		}
 	],
 	"tabBar": {
+		"custom": true,
 		"color": "#999999",
-		"selectedColor": "#007aff",
+		"selectedColor": "#667eea",
 		"backgroundColor": "#ffffff",
 		"borderStyle": "black",
 		"list": [
@@ -46,10 +57,24 @@
 				"text": "商品"
 			},
 			{
+				"pagePath": "pages/add/add",
+				"text": "添加"
+			},
+			{
+				"pagePath": "pages/checkout/checkout",
+				"text": "购物车"
+			},
+			{
 				"pagePath": "pages/profile/profile",
 				"text": "我的"
 			}
 		]
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+		}
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

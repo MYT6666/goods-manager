@@ -1,6 +1,7 @@
 <template>
 	<view class="content">
 		<!-- 用户信息卡片 -->
+		<view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
 		<view class="user-card">
 			<view class="user-avatar">
 				<text class="avatar-text">{{ (userInfo && userInfo.username && userInfo.username.charAt(0) && userInfo.username.charAt(0).toUpperCase()) || '?' }}</text>
@@ -14,7 +15,10 @@
 		<!-- 店铺信息卡片 -->
 		<view class="shop-card" v-if="userInfo && userInfo.shop_id">
 			<view class="card-header">
-				<text class="card-title">🏪 店铺信息</text>
+				<view class="card-title-row">
+					<uni-icons type="shop" size="20" color="#667eea"></uni-icons>
+					<text class="card-title">店铺信息</text>
+				</view>
 			</view>
 			<view class="shop-info-list">
 				<view class="info-item">
@@ -34,7 +38,10 @@
 		<!-- 邀请码管理（仅店长） -->
 		<view class="section-card" v-if="userInfo && userInfo.role === 'store_manager'">
 			<view class="card-header">
-				<text class="card-title">🔑 邀请码管理</text>
+				<view class="card-title-row">
+					<uni-icons type="locked" size="20" color="#667eea"></uni-icons>
+					<text class="card-title">邀请码管理</text>
+				</view>
 				<text class="card-subtitle">多人共用，无限使用</text>
 			</view>
 			<view class="codes-list">
@@ -54,7 +61,7 @@
 				</view>
 			</view>
 			<button class="refresh-btn" @click="loadInviteCodes">
-				<text class="btn-icon">🔄</text>
+				<uni-icons type="refresh" size="18" color="#667eea"></uni-icons>
 				<text>刷新邀请码</text>
 			</button>
 		</view>
@@ -62,7 +69,10 @@
 		<!-- 员工管理（店长和经理） -->
 		<view class="section-card" v-if="userInfo && (userInfo.role === 'store_manager' || userInfo.role === 'manager')">
 			<view class="card-header">
-				<text class="card-title">👥 员工管理</text>
+				<view class="card-title-row">
+					<uni-icons type="staff" size="20" color="#667eea"></uni-icons>
+					<text class="card-title">员工管理</text>
+				</view>
 			</view>
 
 			<!-- 经理列表（仅店长可见） -->
@@ -73,7 +83,7 @@
 				</view>
 				<view class="staff-list" v-if="managers.length > 0">
 					<view v-for="manager in managers" :key="manager.id" class="staff-item">
-						<view class="staff-avatar">👤</view>
+						<view class="staff-avatar"><text class="staff-avatar-text">{{ manager.username.charAt(0).toUpperCase() }}</text></view>
 						<text class="staff-name">{{ manager.username }}</text>
 						<button class="delete-btn" @click="deleteStaff(manager.id, manager.username)">删除</button>
 					</view>
@@ -91,7 +101,7 @@
 				</view>
 				<view class="staff-list" v-if="staffs.length > 0">
 					<view v-for="staff in staffs" :key="staff.id" class="staff-item">
-						<view class="staff-avatar">👤</view>
+						<view class="staff-avatar"><text class="staff-avatar-text">{{ staff.username.charAt(0).toUpperCase() }}</text></view>
 						<text class="staff-name">{{ staff.username }}</text>
 						<button class="delete-btn" @click="deleteStaff(staff.id, staff.username)">删除</button>
 					</view>
@@ -102,23 +112,30 @@
 			</view>
 
 			<button class="refresh-btn" @click="loadStaffList">
-				<text class="btn-icon">🔄</text>
+				<uni-icons type="refresh" size="18" color="#667eea"></uni-icons>
 				<text>刷新列表</text>
 			</button>
 		</view>
 
 		<!-- 退出登录 -->
 		<button class="logout-btn" @click="logout">
-			<text class="btn-icon">🚪</text>
+			<uni-icons type="undo" size="20" color="#ffffff"></uni-icons>
 			<text>退出登录</text>
 		</button>
+
+		<!-- 自定义TabBar -->
+		<tab-bar :currentIndex="4"></tab-bar>
 	</view>
 </template>
 
 <script>
+import TabBar from '@/components/tab-bar/tab-bar.vue';
+
 export default {
+	components: { TabBar },
 	data() {
 		return {
+			statusBarHeight: 0,
 			userInfo: null,
 			managers: [],
 			staffs: [],
@@ -142,18 +159,10 @@ export default {
 		}
 	},
 	onLoad() {
-		this.userInfo = uni.getStorageSync('userInfo');
-		if (this.userInfo && this.userInfo.shop_id) {
-				this.loadShopInfo();
-			}
-			if (this.userInfo && (this.userInfo.role === 'store_manager' || this.userInfo.role === 'manager')) {
-				this.loadStaffList();
-			}
-			if (this.userInfo && this.userInfo.role === 'store_manager') {
-				this.loadInviteCodes();
-			}
+		this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight || 0;
 	},
 	onShow() {
+		uni.hideTabBar({ animation: false });
 		this.userInfo = uni.getStorageSync('userInfo');
 		if (this.userInfo && this.userInfo.shop_id) {
 			this.loadShopInfo();
@@ -336,9 +345,9 @@ export default {
 <style>
 .content {
 	min-height: 100vh;
-	background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+	background: #f5f6fa;
 	padding: 30rpx;
-	padding-bottom: 50rpx;
+	padding-bottom: 160rpx;
 }
 
 /* 用户信息卡片 */
@@ -411,11 +420,17 @@ export default {
 	border-radius: 20rpx;
 	padding: 30rpx;
 	margin-bottom: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 }
 
 .card-header {
 	margin-bottom: 25rpx;
+}
+
+.card-title-row {
+	display: flex;
+	align-items: center;
+	gap: 14rpx;
 }
 
 .card-title {
@@ -442,7 +457,7 @@ export default {
 	justify-content: space-between;
 	align-items: center;
 	padding: 20rpx 0;
-	border-bottom: 2rpx solid #f5f5f5;
+	border-bottom: 2rpx solid #f0f1f5;
 }
 
 .info-item:last-child {
@@ -486,7 +501,7 @@ export default {
 	border-radius: 20rpx;
 	padding: 30rpx;
 	margin-bottom: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 }
 
 /* 邀请码列表 */
@@ -501,7 +516,7 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background: #f8f9fa;
+	background: #f5f6fa;
 	border-radius: 16rpx;
 	padding: 25rpx;
 }
@@ -528,8 +543,8 @@ export default {
 .copy-btn {
 	padding: 15rpx 30rpx;
 	margin: 0;
-	background: #e3f2fd;
-	color: #2196f3;
+	background: #e8eaf6;
+	color: #667eea;
 	font-size: 26rpx;
 	border-radius: 30rpx;
 	font-weight: 500;
@@ -574,7 +589,7 @@ export default {
 .staff-item {
 	display: flex;
 	align-items: center;
-	background: #f8f9fa;
+	background: #f5f6fa;
 	border-radius: 16rpx;
 	padding: 20rpx 25rpx;
 }
@@ -587,8 +602,13 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 28rpx;
 	margin-right: 20rpx;
+}
+
+.staff-avatar-text {
+	font-size: 26rpx;
+	font-weight: bold;
+	color: #ffffff;
 }
 
 .staff-name {
@@ -612,7 +632,7 @@ export default {
 	padding: 40rpx;
 	color: #999;
 	font-size: 28rpx;
-	background: #f8f9fa;
+	background: #f5f6fa;
 	border-radius: 16rpx;
 }
 
@@ -621,7 +641,7 @@ export default {
 	width: 100%;
 	height: 80rpx;
 	line-height: 80rpx;
-	background: #f5f5f5;
+	background: #f0f1f5;
 	color: #666;
 	font-size: 28rpx;
 	border-radius: 12rpx;
@@ -630,10 +650,6 @@ export default {
 	align-items: center;
 	justify-content: center;
 	gap: 10rpx;
-}
-
-.btn-icon {
-	font-size: 28rpx;
 }
 
 /* 退出登录 */

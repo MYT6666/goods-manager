@@ -9,6 +9,9 @@ export default {
     onLaunch: async function() {
         console.log('App Launch');
         
+        // 隐藏原生 tabBar，使用自定义 tabBar
+        uni.hideTabBar();
+        
         // 清除可能存在的旧缓存（每次启动时）
         // 注意：这会导致每次启动都需要重新登录
         // 生产环境应该根据实际需求决定是否清除

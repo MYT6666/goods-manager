@@ -27,7 +27,7 @@ exports.main = async (event, context) => {
     const { userInfo } = context;
 
     // 优先使用显式传入的 openid，否则从 context 获取
-    let openid = (eventOpenid || userInfo?.uid || '').trim();
+    let openid = (eventOpenid || (userInfo && userInfo.uid) || (data && data.openid) || '').trim();
     
     console.log('=== mysql-api 诊断 ===');
     console.log('完整 event:', JSON.stringify(event));
@@ -80,8 +80,17 @@ exports.main = async (event, context) => {
                     return { code: 403, message: '权限不足' };
                 }
                 return await del(id, shopId);
-            default:
+            case 'update':
+                if (userRole !== 'store_manager' && userRole !== 'manager') {
+                    return { code: 403, message: '权限不足' };
+                }
+                return await update({ ...data }, shopId);
+            case 'alterAddImage':
+                return await alterAddImage();
+            case 'getAll':
                 return await getAll(shopId);
+            default:
+                return { code: 400, message: '无效的操作' };
         }
     } catch (error) {
         console.error('云函数执行失败:', error);
@@ -107,8 +116,8 @@ async function queryByBarcode(barcode, shopId) {
 
 async function add(data, shopId) {
     await pool.execute(
-        'INSERT INTO goods_model (name, purchase_price, selling_price, profit, barcode, remark, openid, shop_id, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())',
-        [data.name, data.purchase_price, data.selling_price, data.profit, data.barcode, data.remark, data.openid, shopId]
+        'INSERT INTO goods_model (name, purchase_price, selling_price, profit, barcode, remark, image_url, openid, shop_id, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+        [data.name, data.purchase_price, data.selling_price, data.profit, data.barcode, data.remark, data.image_url || '', data.openid, shopId]
     );
     return { code: 0, message: '添加成功' };
 }
@@ -131,4 +140,31 @@ async function del(id, shopId) {
         return { code: 404, message: '商品不存在或无权限删除' };
     }
     return { code: 0, message: '删除成功' };
+}
+
+async function update(data, shopId) {
+    const { id, name, purchase_price, selling_price, barcode, remark, image_url } = data;
+    const profit = parseFloat(selling_price) - parseFloat(purchase_price);
+    const [result] = await pool.execute(
+        'UPDATE goods_model SET name = ?, purchase_price = ?, selling_price = ?, profit = ?, barcode = ?, remark = ?, image_url = ? WHERE id = ? AND shop_id = ?',
+        [name, purchase_price, selling_price, profit, barcode, remark, image_url || '', id, shopId]
+    );
+    if (result.affectedRows === 0) {
+        return { code: 404, message: '商品不存在或无权限修改' };
+    }
+    return { code: 0, message: '修改成功' };
+}
+
+async function alterAddImage() {
+    try {
+        await pool.execute(
+            'ALTER TABLE goods_model ADD COLUMN image_url TEXT AFTER remark'
+        );
+        return { code: 0, message: 'image_url 字段添加成功' };
+    } catch (err) {
+        if (err.code === 'ER_DUP_FIELDNAME') {
+            return { code: 0, message: 'image_url 字段已存在' };
+        }
+        return { code: 500, message: '添加字段失败', error: err.message };
+    }
 }

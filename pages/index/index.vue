@@ -1,189 +1,141 @@
 <template>
 	<view class="content">
-		<!-- 欢迎区域 -->
-		<view class="welcome-section">
-			<view class="welcome-header">
-				<text class="greeting">欢迎使用</text>
-				<text class="app-name">商品管理系统</text>
+		<!-- 顶部欢迎区 -->
+		<view class="welcome-header">
+			<view class="welcome-text">
+				<text class="greeting">{{ greetingText }}</text>
+				<text class="username">{{ (userInfo && userInfo.username) || '用户' }}</text>
 			</view>
-			<view class="user-brief" v-if="userInfo">
-				<text class="welcome-text">你好，{{ userInfo.username }}</text>
-				<text class="role-badge" :class="userInfo.role">{{ roleText }}</text>
+			<view class="shop-badge" v-if="userInfo && userInfo.shop_id">
+				<view class="badge-dot"></view>
+				<text class="badge-text">{{ shopName || '我的店铺' }}</text>
 			</view>
 		</view>
 
-		<!-- 快捷操作区 -->
-		<view class="quick-actions">
-			<view class="action-title">快捷操作</view>
-			<view class="action-grid">
-				<view class="action-item scan" @click="scanCode">
-					<view class="action-icon">
-						<text class="iconfont">📷</text>
-					</view>
-					<text class="action-name">扫码查价</text>
-					<text class="action-desc">扫描商品条码</text>
-				</view>
-				<view class="action-item add" @click="showAddForm">
-					<view class="action-icon">
-						<text class="iconfont">➕</text>
-					</view>
-					<text class="action-name">新增商品</text>
-					<text class="action-desc">添加新商品</text>
+		<!-- 搜索栏 -->
+		<view class="search-bar">
+			<view class="search-input-wrap">
+				<uni-icons type="search" size="18" color="#b0b0b0"></uni-icons>
+				<input type="text" v-model="searchKeyword" placeholder="搜索商品名称或条码" class="search-input" @confirm="handleSearch" confirm-type="search" cursor-spacing="20" />
+				<view class="clear-btn" v-if="searchKeyword" @click="clearSearch">
+					<uni-icons type="clear" size="18" color="#b0b0b0"></uni-icons>
 				</view>
 			</view>
 		</view>
 
-		<!-- 搜索区域 -->
-		<view class="search-section">
-			<view class="search-box">
-				<text class="search-icon">🔍</text>
-				<input 
-					type="text" 
-					v-model="searchKeyword" 
-					placeholder="搜索商品名称或条码..." 
-					class="search-input" 
-					@confirm="handleSearch"
-				/>
-				<button v-if="searchKeyword" class="clear-btn" @click="clearSearch">✕</button>
+		<!-- 快捷操作 -->
+		<view class="action-grid">
+			<view class="action-item" @click="scanCode">
+				<view class="action-icon-wrap action-icon-scan">
+					<uni-icons type="scan" size="24" color="#ffffff"></uni-icons>
+				</view>
+				<text class="action-name">扫码查价</text>
 			</view>
-			<button class="search-btn" @click="handleSearch">搜索</button>
+			<view class="action-item" @click="goCheckout">
+				<view class="action-icon-wrap action-icon-checkout">
+					<uni-icons type="cart" size="24" color="#ffffff"></uni-icons>
+				</view>
+				<text class="action-name">扫码结账</text>
+			</view>
+			<view class="action-item" @click="goAdd">
+				<view class="action-icon-wrap action-icon-add">
+					<uni-icons type="plusempty" size="24" color="#ffffff"></uni-icons>
+				</view>
+				<text class="action-name">新增商品</text>
+			</view>
 		</view>
 
-		<!-- 搜索结果展示 -->
+		<!-- 扫码/搜索结果 -->
 		<view class="result-section" v-if="scannedGoods">
-			<view class="result-header">
-				<text class="result-title">查询结果</text>
-				<button class="close-btn" @click="scannedGoods = null">✕</button>
-			</view>
 			<view class="result-card">
-				<view class="result-item">
-					<text class="result-label">商品名称</text>
-					<text class="result-value name">{{ scannedGoods.name }}</text>
+				<view class="result-header">
+					<text class="result-name">{{ scannedGoods.name }}</text>
+					<view class="result-badge">查询结果</view>
 				</view>
-				<view class="result-divider"></view>
-				<view class="result-row">
-					<view class="result-col">
-						<text class="result-label">进价</text>
-						<text class="result-value">¥{{ scannedGoods.purchase_price }}</text>
+				<view class="result-prices">
+					<view class="result-price-item">
+						<text class="rp-label">进价</text>
+						<text class="rp-value">¥{{ formatPrice(scannedGoods.purchase_price) }}</text>
 					</view>
-					<view class="result-col">
-						<text class="result-label">卖价</text>
-						<text class="result-value">¥{{ scannedGoods.selling_price }}</text>
+					<view class="result-divider"></view>
+					<view class="result-price-item">
+						<text class="rp-label">售价</text>
+						<text class="rp-value selling">¥{{ formatPrice(scannedGoods.selling_price) }}</text>
 					</view>
-					<view class="result-col">
-						<text class="result-label">利润</text>
-						<text class="result-value profit">¥{{ (scannedGoods.selling_price - scannedGoods.purchase_price).toFixed(2) }}</text>
+					<view class="result-divider"></view>
+					<view class="result-price-item">
+						<text class="rp-label">利润</text>
+						<text class="rp-value profit">¥{{ calculateProfit(scannedGoods) }}</text>
 					</view>
 				</view>
-				<view class="result-divider" v-if="scannedGoods.remark"></view>
-				<view class="result-item" v-if="scannedGoods.remark">
-					<text class="result-label">备注</text>
-					<text class="result-value remark">{{ scannedGoods.remark }}</text>
+				<view class="result-barcode">
+					<text class="rb-label">条码</text>
+					<text class="rb-value">{{ scannedGoods.barcode }}</text>
 				</view>
 			</view>
 		</view>
 
 		<!-- 空状态提示 -->
 		<view class="empty-tip" v-if="!scannedGoods && !searchKeyword">
-			<view class="tip-icon">💡</view>
-			<text class="tip-text">使用上方功能开始管理商品</text>
-			<text class="tip-sub">扫码快速查询 ｜ 添加新商品</text>
-		</view>
-
-		<!-- 新增商品弹窗 -->
-		<view class="popup" v-if="showPopup">
-			<view class="popup-mask" @click="closeAddForm"></view>
-			<view class="popup-content">
-				<view class="popup-header">
-					<text class="popup-title">新增商品</text>
-					<button class="popup-close" @click="closeAddForm">✕</button>
-				</view>
-
-				<view class="form">
-					<view class="form-item">
-						<text class="form-label">商品名称 <text class="required">*</text></text>
-						<input type="text" v-model="formData.name" placeholder="请输入商品名称" class="form-input" />
-					</view>
-
-					<view class="form-row">
-						<view class="form-item half">
-							<text class="form-label">进价 <text class="required">*</text></text>
-							<view class="input-with-unit">
-								<input type="digit" v-model.number="formData.purchase_price" placeholder="0.00" class="form-input" />
-								<text class="unit">元</text>
-							</view>
-						</view>
-						<view class="form-item half">
-							<text class="form-label">卖价 <text class="required">*</text></text>
-							<view class="input-with-unit">
-								<input type="digit" v-model.number="formData.selling_price" placeholder="0.00" class="form-input" />
-								<text class="unit">元</text>
-							</view>
-						</view>
-					</view>
-
-					<view class="form-item">
-					<text class="form-label">商品条码 <text class="required">*</text></text>
-					<view class="barcode-input-row">
-						<input type="text" v-model="formData.barcode" placeholder="请输入或扫描商品条码" class="form-input barcode-input" />
-						<button class="scan-barcode-btn" @click="scanBarcodeForForm">
-							<text class="btn-icon">📷</text>
-							<text>扫码</text>
-						</button>
-					</view>
-				</view>
-
-					<view class="form-item">
-						<text class="form-label">备注</text>
-						<textarea v-model="formData.remark" placeholder="可选填" class="form-textarea" :maxlength="100" />
-						<text class="char-count">{{ (formData.remark && formData.remark.length) || 0 }}/100</text>
-					</view>
-				</view>
-
-				<view class="popup-footer">
-					<button class="btn-cancel" @click="closeAddForm">取消</button>
-					<button class="btn-submit" @click="submitForm">保存商品</button>
-				</view>
+			<view class="tip-illustration">
+				<uni-icons type="scan" size="32" color="#667eea"></uni-icons>
 			</view>
+			<text class="tip-text">扫描商品条码快速查询价格</text>
+			<text class="tip-sub">扫码查价 / 扫码结账 / 添加新商品</text>
 		</view>
+
+		<!-- 自定义TabBar -->
+		<tab-bar :currentIndex="0"></tab-bar>
 	</view>
 </template>
 
 <script>
+import TabBar from '@/components/tab-bar/tab-bar.vue';
+
 export default {
+	components: { TabBar },
 	data() {
 		return {
 			scannedGoods: null,
-			showPopup: false,
 			searchKeyword: '',
 			userInfo: null,
-			formData: {
-				name: '',
-				purchase_price: '',
-				selling_price: '',
-				barcode: '',
-				remark: ''
-			}
+			shopName: ''
 		};
 	},
 	computed: {
-		roleText() {
-			const roleMap = {
-				'store_manager': '店长',
-				'manager': '经理',
-				'staff': '店员'
-			};
-			return (this.userInfo && roleMap[this.userInfo.role]) || '';
+		greetingText() {
+			const hour = new Date().getHours();
+			if (hour < 6) return '夜深了';
+			if (hour < 12) return '早上好';
+			if (hour < 14) return '中午好';
+			if (hour < 18) return '下午好';
+			return '晚上好';
 		}
 	},
 	onLoad() {
 		this.userInfo = uni.getStorageSync('userInfo');
-		if (!this.userInfo || !this.userInfo.id) {
-			uni.navigateTo({ url: '/pages/login/login' });
-		}
+	},
+	onShow() {
+		uni.hideTabBar({ animation: false });
+		this.userInfo = uni.getStorageSync('userInfo');
+		this.loadShopName();
 	},
 	methods: {
-		// 扫码
+		async loadShopName() {
+			try {
+				const app = getApp().globalData.cloudbase;
+				const userInfo = uni.getStorageSync('userInfo');
+				if (!userInfo || !userInfo.shop_id) return;
+				const res = await app.callFunction({
+					name: 'user-auth',
+					data: { action: 'getShopInfo', data: { shopId: userInfo.shop_id } }
+				});
+				if (res.result.code === 0 && res.result.data) {
+					this.shopName = res.result.data.shop_name || '';
+				}
+			} catch (e) {}
+		},
+
 		scanCode() {
 			// #ifdef H5
 			uni.showModal({
@@ -193,7 +145,7 @@ export default {
 				placeholderText: '请输入商品条码',
 				success: (res) => {
 					if (res.confirm && res.content) {
-						this.queryGoodsByBarcode(res.content.trim());
+						this.queryByBarcode(res.content.trim());
 					}
 				}
 			});
@@ -201,8 +153,24 @@ export default {
 
 			// #ifndef H5
 			uni.scanCode({
+				scanType: ['barCode'],
+				onlyFromCamera: true,
+				autoDecodeCharSet: true,
 				success: (res) => {
-					this.queryGoodsByBarcode(res.result);
+					uni.vibrateShort();
+					const code = res.result.trim();
+					uni.showModal({
+						title: '扫码结果',
+						content: '识别到的条码：' + code,
+						editable: true,
+						placeholderText: code,
+						success: (modalRes) => {
+							if (modalRes.confirm) {
+								const finalCode = (modalRes.content && modalRes.content.trim()) || code;
+								this.queryByBarcode(finalCode);
+							}
+						}
+					});
 				},
 				fail: () => {
 					uni.showToast({ title: '扫码失败', icon: 'none' });
@@ -211,8 +179,7 @@ export default {
 			// #endif
 		},
 
-		// 根据条码查询商品
-		async queryGoodsByBarcode(barcode) {
+		async queryByBarcode(barcode) {
 			try {
 				const app = getApp().globalData.cloudbase;
 				const userInfo = uni.getStorageSync('userInfo');
@@ -225,7 +192,7 @@ export default {
 					name: 'mysql-api',
 					data: {
 						action: 'queryByBarcode',
-						barcode,
+						barcode: barcode,
 						shopId: userInfo.shop_id,
 						role: userInfo.role
 					}
@@ -234,176 +201,38 @@ export default {
 				if (res.result.code === 0 && res.result.data.length > 0) {
 					this.scannedGoods = res.result.data[0];
 				} else {
-					uni.showModal({
-						title: '未找到商品',
-						content: '该商品不存在，是否立即录入？',
-						success: (modalRes) => {
-							if (modalRes.confirm) {
-								this.formData = { name: '', purchase_price: '', selling_price: '', barcode, remark: '' };
-								this.showPopup = true;
-							}
-						}
-					});
+					uni.showToast({ title: '未找到该商品', icon: 'none' });
 				}
-			} catch {
+			} catch (err) {
+				console.error('查询失败:', err);
 				uni.showToast({ title: '查询失败', icon: 'none' });
 			}
 		},
 
-		// 显示新增表单
-		showAddForm() {
-			this.formData = { name: '', purchase_price: '', selling_price: '', barcode: '', remark: '' };
-			this.showPopup = true;
+		async handleSearch() {
+			if (!this.searchKeyword.trim()) return;
+			await this.queryByBarcode(this.searchKeyword.trim());
 		},
 
-		// 关闭新增表单
-		closeAddForm() {
-			this.showPopup = false;
-		},
-
-		// 清空搜索
 		clearSearch() {
 			this.searchKeyword = '';
 			this.scannedGoods = null;
 		},
 
-		// 扫码录入条码（用于表单）
-		scanBarcodeForForm() {
-			// #ifdef H5
-			uni.showModal({
-				title: '输入条码',
-				content: 'H5 环境不支持扫码，请手动输入商品条码',
-				editable: true,
-				placeholderText: '请输入商品条码',
-				success: (res) => {
-					if (res.confirm && res.content) {
-						this.formData.barcode = res.content.trim();
-					}
-				}
-			});
-			// #endif
-
-			// #ifndef H5
-			uni.scanCode({
-				success: (res) => {
-					this.formData.barcode = res.result;
-					uni.showToast({ title: '扫码成功', icon: 'success' });
-				},
-				fail: () => {
-					uni.showToast({ title: '扫码失败', icon: 'none' });
-				}
-			});
-			// #endif
+		formatPrice(price) {
+			return parseFloat(price || 0).toFixed(2);
 		},
 
-		// 提交表单
-		async submitForm() {
-			if (!this.formData.name) {
-				uni.showToast({ title: '请输入商品名称', icon: 'none' });
-				return;
-			}
-			if (!this.formData.purchase_price || this.formData.purchase_price <= 0) {
-				uni.showToast({ title: '请输入有效的进价', icon: 'none' });
-				return;
-			}
-			if (!this.formData.selling_price || this.formData.selling_price <= 0) {
-				uni.showToast({ title: '请输入有效的卖价', icon: 'none' });
-				return;
-			}
-			if (!this.formData.barcode) {
-				uni.showToast({ title: '请输入商品条码', icon: 'none' });
-				return;
-			}
-
-			try {
-				const app = getApp().globalData.cloudbase;
-				const userInfo = uni.getStorageSync('userInfo');
-				if (!userInfo || !userInfo.shop_id) {
-					uni.showToast({ title: '用户信息不完整', icon: 'none' });
-					return;
-				}
-
-				// 检查条码是否已存在
-				const checkRes = await app.callFunction({
-					name: 'mysql-api',
-					data: {
-						action: 'queryByBarcode',
-						barcode: this.formData.barcode,
-						shopId: userInfo.shop_id,
-						role: userInfo.role
-					}
-				});
-
-				if (checkRes.result.code === 0 && checkRes.result.data.length > 0) {
-					uni.showToast({ title: '条码已存在', icon: 'none' });
-					return;
-				}
-
-				// 保存商品
-				const profit = parseFloat(this.formData.selling_price) - parseFloat(this.formData.purchase_price);
-				const res = await app.callFunction({
-					name: 'mysql-api',
-					data: {
-						action: 'add',
-						data: {
-							...this.formData,
-							profit,
-							openid: userInfo.openid || '',
-							createdAt: new Date().toISOString()
-						},
-						shopId: userInfo.shop_id,
-						role: userInfo.role
-					}
-				});
-
-				if (res.result.code === 0) {
-					uni.showToast({ title: '添加成功', icon: 'success' });
-					this.closeAddForm();
-				} else {
-					uni.showToast({ title: '保存失败', icon: 'none' });
-				}
-			} catch {
-				uni.showToast({ title: '保存失败', icon: 'none' });
-			}
+		calculateProfit(goods) {
+			return (parseFloat(goods.selling_price || 0) - parseFloat(goods.purchase_price || 0)).toFixed(2);
 		},
 
-		// 搜索商品
-		async handleSearch() {
-			if (!this.searchKeyword) {
-				this.scannedGoods = null;
-				return;
-			}
+		goCheckout() {
+			uni.switchTab({ url: '/pages/checkout/checkout' });
+		},
 
-			try {
-				const app = getApp().globalData.cloudbase;
-				const userInfo = uni.getStorageSync('userInfo');
-				if (!userInfo || !userInfo.shop_id) {
-					uni.showToast({ title: '用户信息不完整', icon: 'none' });
-					return;
-				}
-
-				const res = await app.callFunction({
-					name: 'mysql-api',
-					data: {
-						action: 'search',
-						keyword: this.searchKeyword,
-						shopId: userInfo.shop_id,
-						role: userInfo.role
-					}
-				});
-
-				if (res.result.code === 0) {
-					const results = res.result.data || [];
-					if (results.length > 0) {
-						this.scannedGoods = results[0];
-					} else {
-						this.scannedGoods = null;
-						uni.showToast({ title: '未找到匹配的商品', icon: 'none' });
-					}
-				}
-			} catch {
-				uni.showToast({ title: '搜索失败', icon: 'none' });
-			}
+		goAdd() {
+			uni.switchTab({ url: '/pages/add/add' });
 		}
 	}
 };
@@ -412,506 +241,259 @@ export default {
 <style>
 .content {
 	min-height: 100vh;
-	background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+	background: #f5f6fa;
 	padding: 30rpx;
+	padding-bottom: 160rpx;
 }
 
-/* 欢迎区域 */
-.welcome-section {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	border-radius: 24rpx;
-	padding: 40rpx;
-	margin-bottom: 30rpx;
-	box-shadow: 0 10rpx 40rpx rgba(102, 126, 234, 0.3);
-}
-
+/* ===== 欢迎区 ===== */
 .welcome-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 	margin-bottom: 30rpx;
+	padding: 0 10rpx;
 }
 
 .greeting {
 	display: block;
-	font-size: 28rpx;
-	color: rgba(255, 255, 255, 0.8);
-	margin-bottom: 10rpx;
+	font-size: 26rpx;
+	color: #999;
+	margin-bottom: 8rpx;
 }
 
-.app-name {
+.username {
 	display: block;
-	font-size: 48rpx;
+	font-size: 40rpx;
 	font-weight: bold;
-	color: #ffffff;
+	color: #1a1a2e;
 }
 
-.user-brief {
+.shop-badge {
 	display: flex;
 	align-items: center;
-	gap: 20rpx;
+	gap: 10rpx;
+	background: #ffffff;
+	padding: 14rpx 24rpx;
+	border-radius: 30rpx;
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
-.welcome-text {
-	font-size: 32rpx;
-	color: #ffffff;
+.badge-dot {
+	width: 14rpx;
+	height: 14rpx;
+	background: #667eea;
+	border-radius: 50%;
 }
 
-.role-badge {
-	padding: 6rpx 20rpx;
-	border-radius: 20rpx;
-	font-size: 22rpx;
+.badge-text {
+	font-size: 26rpx;
+	color: #333;
 	font-weight: 500;
 }
 
-.role-badge.store_manager {
-	background: rgba(255, 107, 107, 0.9);
-	color: #fff;
-}
-
-.role-badge.manager {
-	background: rgba(78, 205, 196, 0.9);
-	color: #fff;
-}
-
-.role-badge.staff {
-	background: rgba(69, 183, 209, 0.9);
-	color: #fff;
-}
-
-/* 快捷操作区 */
-.quick-actions {
+/* ===== 搜索栏 ===== */
+.search-bar {
 	margin-bottom: 30rpx;
 }
 
-.action-title {
-	font-size: 32rpx;
-	font-weight: bold;
-	color: #333;
-	margin-bottom: 20rpx;
-	padding-left: 10rpx;
+.search-input-wrap {
+	display: flex;
+	align-items: center;
+	background: #ffffff;
+	border-radius: 20rpx;
+	padding: 0 30rpx;
+	height: 88rpx;
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+	gap: 16rpx;
 }
 
+.search-input {
+	flex: 1;
+	height: 88rpx;
+	font-size: 28rpx;
+	color: #333;
+}
+
+.clear-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+/* ===== 快捷操作 ===== */
 .action-grid {
 	display: flex;
 	gap: 20rpx;
+	margin-bottom: 30rpx;
 }
 
 .action-item {
 	flex: 1;
 	background: #ffffff;
-	border-radius: 20rpx;
-	padding: 40rpx 30rpx;
-	text-align: center;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
-	transition: transform 0.2s;
+	border-radius: 24rpx;
+	padding: 30rpx 20rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+	transition: transform 0.15s;
 }
 
 .action-item:active {
-	transform: scale(0.98);
+	transform: scale(0.96);
 }
 
-.action-icon {
-	width: 100rpx;
-	height: 100rpx;
+.action-icon-wrap {
+	width: 88rpx;
+	height: 88rpx;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin: 0 auto 20rpx;
+	margin-bottom: 16rpx;
 }
 
-.action-item.scan .action-icon {
+.action-icon-scan {
 	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.action-item.add .action-icon {
+.action-icon-checkout {
+	background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+
+.action-icon-add {
 	background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
 }
 
-.iconfont {
-	font-size: 48rpx;
-}
-
 .action-name {
-	display: block;
-	font-size: 32rpx;
-	font-weight: bold;
+	font-size: 26rpx;
 	color: #333;
-	margin-bottom: 10rpx;
+	font-weight: 500;
 }
 
-.action-desc {
-	display: block;
-	font-size: 24rpx;
-	color: #999;
-}
-
-/* 搜索区域 */
-.search-section {
-	display: flex;
-	gap: 20rpx;
+/* ===== 结果卡片 ===== */
+.result-section {
 	margin-bottom: 30rpx;
 }
 
-.search-box {
-	flex: 1;
-	display: flex;
-	align-items: center;
-	background: #ffffff;
-	border-radius: 16rpx;
-	padding: 0 20rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
-}
-
-.search-icon {
-	font-size: 32rpx;
-	margin-right: 15rpx;
-}
-
-.search-input {
-	flex: 1;
-	height: 90rpx;
-	font-size: 30rpx;
-	border: none;
-	background: transparent;
-}
-
-.clear-btn {
-	width: 50rpx;
-	height: 50rpx;
-	line-height: 50rpx;
-	padding: 0;
-	margin: 0;
-	font-size: 24rpx;
-	color: #999;
-	background: #f0f0f0;
-	border-radius: 50%;
-}
-
-.search-btn {
-	width: 140rpx;
-	height: 90rpx;
-	line-height: 90rpx;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
-	font-size: 30rpx;
-	font-weight: 500;
-	border-radius: 16rpx;
-	padding: 0;
-	margin: 0;
-	box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
-}
-
-/* 结果区域 */
-.result-section {
+.result-card {
 	background: #ffffff;
 	border-radius: 20rpx;
 	padding: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
 .result-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 20rpx;
+	margin-bottom: 24rpx;
 }
 
-.result-title {
-	font-size: 32rpx;
+.result-name {
+	font-size: 36rpx;
 	font-weight: bold;
-	color: #333;
+	color: #1a1a2e;
 }
 
-.close-btn {
-	width: 50rpx;
-	height: 50rpx;
-	line-height: 50rpx;
-	padding: 0;
-	margin: 0;
-	font-size: 28rpx;
-	color: #999;
-	background: #f5f5f5;
-	border-radius: 50%;
-}
-
-.result-card {
-	background: #f8f9fa;
-	border-radius: 16rpx;
-	padding: 30rpx;
-}
-
-.result-item {
-	margin-bottom: 20rpx;
-}
-
-.result-item:last-child {
-	margin-bottom: 0;
-}
-
-.result-label {
-	display: block;
-	font-size: 24rpx;
-	color: #999;
-	margin-bottom: 10rpx;
-}
-
-.result-value {
-	display: block;
-	font-size: 32rpx;
-	color: #333;
+.result-badge {
+	font-size: 22rpx;
+	color: #667eea;
+	background: #eef0ff;
+	padding: 6rpx 16rpx;
+	border-radius: 12rpx;
 	font-weight: 500;
 }
 
-.result-value.name {
-	font-size: 40rpx;
-	font-weight: bold;
-	color: #667eea;
+.result-prices {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	background: #f8f9fc;
+	border-radius: 16rpx;
+	padding: 24rpx 20rpx;
+	margin-bottom: 20rpx;
 }
 
-.result-value.profit {
-	color: #ff6b6b;
-	font-weight: bold;
+.result-price-item {
+	text-align: center;
 }
 
-.result-value.remark {
-	font-size: 28rpx;
+.rp-label {
+	display: block;
+	font-size: 22rpx;
+	color: #999;
+	margin-bottom: 8rpx;
+}
+
+.rp-value {
+	display: block;
+	font-size: 32rpx;
+	font-weight: bold;
 	color: #666;
+}
+
+.rp-value.selling {
+	color: #11998e;
+}
+
+.rp-value.profit {
+	color: #ff6b6b;
 }
 
 .result-divider {
-	height: 2rpx;
-	background: #e0e0e0;
-	margin: 25rpx 0;
+	width: 2rpx;
+	height: 50rpx;
+	background: #e8e8e8;
 }
 
-.result-row {
+.result-barcode {
 	display: flex;
-	justify-content: space-between;
+	align-items: center;
+	gap: 12rpx;
 }
 
-.result-col {
-	text-align: center;
-	flex: 1;
+.rb-label {
+	font-size: 24rpx;
+	color: #999;
 }
 
-/* 空状态 */
+.rb-value {
+	font-size: 24rpx;
+	color: #666;
+	font-family: monospace;
+}
+
+/* ===== 空状态 ===== */
 .empty-tip {
-	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	padding: 80rpx 40rpx;
 }
 
-.tip-icon {
-	font-size: 80rpx;
-	margin-bottom: 20rpx;
-}
-
-.tip-text {
-	display: block;
-	font-size: 32rpx;
-	color: #333;
-	margin-bottom: 15rpx;
-}
-
-.tip-sub {
-	display: block;
-	font-size: 26rpx;
-	color: #999;
-}
-
-/* 弹窗 */
-.popup {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	z-index: 9999;
-	display: flex;
-	align-items: flex-end;
-}
-
-.popup-mask {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: rgba(0, 0, 0, 0.5);
-}
-
-.popup-content {
-	width: 100%;
-	background: #ffffff;
-	border-radius: 40rpx 40rpx 0 0;
-	padding: 40rpx;
-	position: relative;
-	z-index: 10000;
-	max-height: 85vh;
-	overflow-y: auto;
-}
-
-.popup-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 40rpx;
-}
-
-.popup-title {
-	font-size: 40rpx;
-	font-weight: bold;
-	color: #333;
-}
-
-.popup-close {
-	width: 60rpx;
-	height: 60rpx;
-	line-height: 60rpx;
-	padding: 0;
-	margin: 0;
-	font-size: 32rpx;
-	color: #999;
-	background: #f5f5f5;
+.tip-illustration {
+	width: 120rpx;
+	height: 120rpx;
+	background: #eef0ff;
 	border-radius: 50%;
-}
-
-/* 表单 */
-.form {
-	margin-bottom: 40rpx;
-}
-
-.form-item {
-	margin-bottom: 30rpx;
-}
-
-.form-row {
-	display: flex;
-	gap: 20rpx;
-}
-
-.form-item.half {
-	flex: 1;
-}
-
-.form-label {
-	display: block;
-	font-size: 28rpx;
-	color: #333;
-	margin-bottom: 15rpx;
-	font-weight: 500;
-}
-
-.required {
-	color: #ff6b6b;
-}
-
-.form-input {
-	width: 100%;
-	height: 90rpx;
-	background: #f5f5f5;
-	border-radius: 12rpx;
-	padding: 0 25rpx;
-	font-size: 30rpx;
-	border: 2rpx solid transparent;
-	transition: border-color 0.2s;
-}
-
-.form-input:focus {
-	border-color: #667eea;
-}
-
-.input-with-unit {
-	display: flex;
-	align-items: center;
-	background: #f5f5f5;
-	border-radius: 12rpx;
-	padding-right: 25rpx;
-}
-
-.input-with-unit .form-input {
-	background: transparent;
-	flex: 1;
-}
-
-.unit {
-	font-size: 28rpx;
-	color: #666;
-}
-
-/* 条码输入行 */
-.barcode-input-row {
-	display: flex;
-	gap: 15rpx;
-	align-items: center;
-}
-
-.barcode-input {
-	flex: 1;
-}
-
-.scan-barcode-btn {
-	width: 160rpx;
-	height: 90rpx;
-	padding: 0;
-	margin: 0;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
-	font-size: 26rpx;
-	border-radius: 12rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8rpx;
+	margin-bottom: 30rpx;
 }
 
-.scan-barcode-btn .btn-icon {
-	font-size: 28rpx;
-}
-
-.form-textarea {
-	width: 100%;
-	height: 160rpx;
-	background: #f5f5f5;
-	border-radius: 12rpx;
-	padding: 20rpx 25rpx;
+.tip-text {
 	font-size: 30rpx;
-	border: 2rpx solid transparent;
-}
-
-.char-count {
-	display: block;
-	text-align: right;
-	font-size: 24rpx;
-	color: #999;
-	margin-top: 10rpx;
-}
-
-/* 弹窗底部 */
-.popup-footer {
-	display: flex;
-	gap: 20rpx;
-	padding-top: 20rpx;
-}
-
-.btn-cancel,
-.btn-submit {
-	flex: 1;
-	height: 90rpx;
-	line-height: 90rpx;
-	font-size: 32rpx;
+	color: #333;
 	font-weight: 500;
-	border-radius: 16rpx;
-	padding: 0;
-	margin: 0;
+	margin-bottom: 12rpx;
 }
 
-.btn-cancel {
-	background: #f5f5f5;
-	color: #666;
-}
-
-.btn-submit {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
-	box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
+.tip-sub {
+	font-size: 24rpx;
+	color: #b0b0b0;
 }
 </style>
