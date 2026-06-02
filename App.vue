@@ -28,7 +28,10 @@ export default {
 
         // 关键修复：先完成匿名登录，再决定跳转
         try {
-            await app.auth({ persistence: 'local' }).anonymousAuthProvider().signIn();
+            await Promise.race([
+                app.auth({ persistence: 'local' }).anonymousAuthProvider().signIn(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('登录超时')), 10000))
+            ]);
             console.log('✅ 匿名登录成功');
             
             // 登录成功后，检查本地用户信息
