@@ -1,33 +1,39 @@
 <template>
-	<view class="content">
-		<!-- 页面头部 -->
+	<view class="page">
+		<!-- ===== 状态栏占位 ===== -->
 		<view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
-		<view class="page-header">
-			<view class="header-title">
-				<text class="title-text">商品列表</text>
-				<text class="title-count" v-if="goodsList.length > 0">{{ goodsList.length }}件商品</text>
+
+		<!-- ===== 顶部：标题 + 导出 ===== -->
+		<view class="top-bar">
+			<view class="top-title-row">
+				<text class="page-title">商品列表</text>
+				<text class="goods-count" v-if="goodsList.length > 0">{{ goodsList.length }}件</text>
 			</view>
 			<view class="export-btn" v-if="goodsList.length > 0" @click="exportToExcel">
-				<uni-icons type="download" size="14" color="#667eea"></uni-icons>
+				<uni-icons type="download" size="16" color="#4F46E5"></uni-icons>
 				<text class="export-text">导出</text>
-			</view>
-			<view class="header-stats" v-if="goodsList.length > 0">
-				<view class="stat-item">
-					<text class="stat-value">{{ totalPurchase }}</text>
-					<text class="stat-label">总进价</text>
-				</view>
-				<view class="stat-item">
-					<text class="stat-value">{{ totalSelling }}</text>
-					<text class="stat-label">总售价</text>
-				</view>
-				<view class="stat-item">
-					<text class="stat-value profit">{{ totalProfit }}</text>
-					<text class="stat-label">总利润</text>
-				</view>
 			</view>
 		</view>
 
-		<!-- 商品列表 -->
+		<!-- ===== 财务仪表盘 ===== -->
+		<view class="dashboard" v-if="goodsList.length > 0">
+			<view class="dash-item">
+				<text class="dash-label">总进价</text>
+				<text class="dash-value">{{ totalPurchase }}</text>
+			</view>
+			<view class="dash-divider"></view>
+			<view class="dash-item">
+				<text class="dash-label">总售价</text>
+				<text class="dash-value">{{ totalSelling }}</text>
+			</view>
+			<view class="dash-divider"></view>
+			<view class="dash-item">
+				<text class="dash-label">总利润</text>
+				<text class="dash-value dash-profit">{{ totalProfit }}</text>
+			</view>
+		</view>
+
+		<!-- ===== 商品列表 ===== -->
 		<view class="goods-list" v-if="goodsList.length > 0">
 			<view
 				v-for="(goods, index) in goodsList"
@@ -35,57 +41,62 @@
 				class="goods-card"
 			>
 				<view class="card-main" @click="openGoodsDetail(goods)">
-					<view class="goods-header">
-						<view class="goods-name-row">
-							<view v-if="goods.image_url" class="goods-avatar-img">
-								<image :src="goods.image_url" mode="aspectFill" class="avatar-image"></image>
-							</view>
-							<view v-else class="goods-avatar" :style="{ background: getAvatarColor(goods.name) }">
-								<text class="avatar-letter">{{ goods.name.charAt(0) }}</text>
-							</view>
-							<view class="goods-name-col">
+					<view class="goods-row">
+						<!-- 头像 -->
+						<view v-if="goods.image_url" class="goods-avatar-img">
+							<image :src="goods.image_url" mode="aspectFill" class="avatar-image"></image>
+						</view>
+						<view v-else class="goods-avatar" :style="{ background: getAvatarColor(goods.name) }">
+							<text class="avatar-letter">{{ goods.name.charAt(0) }}</text>
+						</view>
+
+						<!-- 名称 + 条码 + 价格标签 -->
+						<view class="goods-info">
+							<view class="goods-name-row">
 								<text class="goods-name">{{ goods.name }}</text>
-								<text class="goods-barcode">{{ goods.barcode }}</text>
 							</view>
-						</view>
-					</view>
-					<view class="goods-prices">
-						<view class="price-tag purchase">
-							<text class="tag-label">进</text>
-							<text class="tag-value">¥{{ formatPrice(goods.purchase_price) }}</text>
-						</view>
-						<view class="price-tag selling">
-							<text class="tag-label">售</text>
-							<text class="tag-value">¥{{ formatPrice(goods.selling_price) }}</text>
-						</view>
-						<view class="price-tag profit">
-							<text class="tag-label">利</text>
-							<text class="tag-value">¥{{ calculateProfit(goods) }}</text>
+							<text class="goods-barcode">{{ goods.barcode }}</text>
+							<view class="price-tags">
+								<view class="price-tag tag-purchase">
+									<text class="tag-label">进</text>
+									<text class="tag-value">¥{{ formatPrice(goods.purchase_price) }}</text>
+								</view>
+								<view class="price-tag tag-selling">
+									<text class="tag-label">售</text>
+									<text class="tag-value">¥{{ formatPrice(goods.selling_price) }}</text>
+								</view>
+								<view class="price-tag tag-profit">
+									<text class="tag-label">利</text>
+									<text class="tag-value">¥{{ calculateProfit(goods) }}</text>
+								</view>
+							</view>
 						</view>
 					</view>
 				</view>
+
+				<!-- 右侧操作按钮 -->
 				<view class="card-actions" v-if="hasDeletePermission">
-					<view class="action-btn edit" @click.stop="openEditForm(goods)">
-						<uni-icons type="compose" size="18" color="#667eea"></uni-icons>
+					<view class="action-btn btn-edit" @click.stop="openEditForm(goods)">
+						<uni-icons type="compose" size="18" color="#9CA3AF"></uni-icons>
 					</view>
-					<view class="action-btn delete" @click.stop="showDeleteConfirm(goods)">
-						<uni-icons type="trash" size="18" color="#ff6b6b"></uni-icons>
+					<view class="action-btn btn-delete" @click.stop="showDeleteConfirm(goods)">
+						<uni-icons type="trash" size="18" color="#FCA5A5"></uni-icons>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<!-- 空状态 -->
+		<!-- ===== 空状态 ===== -->
 		<view class="empty-state" v-else>
 			<view class="empty-icon">
-				<uni-icons type="shop" size="48" color="#ffffff"></uni-icons>
+				<uni-icons type="shop" size="48" color="#FFFFFF"></uni-icons>
 			</view>
 			<text class="empty-title">暂无商品</text>
 			<text class="empty-desc">点击首页"新增商品"开始添加</text>
 			<button class="empty-btn" @click="goToHome">去添加商品</button>
 		</view>
 
-		<!-- 编辑商品弹窗 -->
+		<!-- ==================== 编辑弹窗 ==================== -->
 		<view class="popup" v-if="showEditPopup">
 			<view class="popup-mask" @click="closeEditForm"></view>
 			<view class="popup-content">
@@ -124,7 +135,7 @@
 						<view class="barcode-input-row">
 							<input type="text" v-model="editFormData.barcode" placeholder="请输入或扫描商品条码" class="form-input barcode-input" cursor-spacing="20" />
 							<button class="scan-barcode-btn" @click="scanBarcodeForEdit">
-								<uni-icons type="scan" size="16" color="#ffffff"></uni-icons>
+								<uni-icons type="scan" size="16" color="#FFFFFF"></uni-icons>
 								<text>扫码</text>
 							</button>
 						</view>
@@ -136,7 +147,7 @@
 							<view v-if="editFormData.image_url" class="image-preview">
 								<image :src="editFormData.image_url" mode="aspectFill" class="preview-img" @click="chooseEditImage"></image>
 								<view class="image-delete-btn" @click="removeEditImage">
-									<uni-icons type="closeempty" size="12" color="#fff"></uni-icons>
+									<uni-icons type="closeempty" size="12" color="#FFF"></uni-icons>
 								</view>
 							</view>
 							<view v-else class="image-add-box" @click="chooseEditImage">
@@ -160,7 +171,7 @@
 			</view>
 		</view>
 
-		<!-- 商品详情弹窗 -->
+		<!-- ==================== 详情弹窗 ==================== -->
 		<view class="popup" v-if="showDetailPopup">
 			<view class="popup-mask" @click="closeDetailPopup"></view>
 			<view class="popup-content detail-popup-content">
@@ -171,7 +182,6 @@
 					</view>
 				</view>
 
-				<!-- 商品图片/头像 -->
 				<view class="detail-image-area">
 					<image v-if="detailGoods.image_url" :src="detailGoods.image_url" mode="aspectFit" class="detail-main-image"></image>
 					<view v-else class="detail-avatar-large" :style="{ background: getAvatarColor(detailGoods.name || '') }">
@@ -179,51 +189,45 @@
 					</view>
 				</view>
 
-				<!-- 商品名称 -->
 				<text class="detail-goods-name">{{ detailGoods.name }}</text>
 
-				<!-- 价格区域 -->
 				<view class="detail-price-row">
 					<view class="detail-price-item">
 						<text class="detail-price-label">进价</text>
-						<text class="detail-price-value purchase">¥{{ formatPrice(detailGoods.purchase_price) }}</text>
+						<text class="detail-price-value">¥{{ formatPrice(detailGoods.purchase_price) }}</text>
 					</view>
 					<view class="detail-price-item">
 						<text class="detail-price-label">售价</text>
-						<text class="detail-price-value selling">¥{{ formatPrice(detailGoods.selling_price) }}</text>
+						<text class="detail-price-value detail-selling">¥{{ formatPrice(detailGoods.selling_price) }}</text>
 					</view>
 					<view class="detail-price-item">
 						<text class="detail-price-label">利润</text>
-						<text class="detail-price-value profit">¥{{ calculateProfit(detailGoods) }}</text>
+						<text class="detail-price-value detail-profit">¥{{ calculateProfit(detailGoods) }}</text>
 					</view>
 				</view>
 
-				<!-- 商品图片信息行 -->
 				<view class="detail-info-row" v-if="detailGoods.image_url">
 					<text class="detail-info-label">商品图片</text>
 					<text class="detail-info-value has-image">已上传</text>
 				</view>
 
-				<!-- 条码 -->
 				<view class="detail-info-row">
 					<text class="detail-info-label">条码</text>
 					<text class="detail-info-value barcode-font">{{ detailGoods.barcode }}</text>
 				</view>
 
-				<!-- 备注 -->
 				<view class="detail-info-row" v-if="detailGoods.remark">
 					<text class="detail-info-label">备注</text>
 					<text class="detail-info-value">{{ detailGoods.remark }}</text>
 				</view>
 
-				<!-- 关闭按钮 -->
 				<view class="detail-close-area">
 					<button class="detail-close-btn" @click="closeDetailPopup">关闭</button>
 				</view>
 			</view>
 		</view>
 
-		<!-- 自定义TabBar -->
+		<!-- ===== 底部导航 ===== -->
 		<tab-bar :currentIndex="1"></tab-bar>
 	</view>
 </template>
@@ -313,7 +317,6 @@ export default {
 					uni.showToast({ title: '用户信息不完整', icon: 'none' });
 					return;
 				}
-
 				const res = await app.callFunction({
 					name: 'mysql-api',
 					data: {
@@ -322,7 +325,6 @@ export default {
 						role: userInfo.role
 					}
 				});
-
 				if (res.result.code === 0) {
 					this.goodsList = res.result.data || [];
 				}
@@ -334,7 +336,7 @@ export default {
 		showDeleteConfirm(goods) {
 			uni.showModal({
 				title: '确认删除',
-				content: `确定要删除 "${goods.name}" 吗？`,
+				content: '确定要删除 "' + goods.name + '" 吗？',
 				confirmColor: '#ff6b6b',
 				success: (res) => {
 					if (res.confirm) {
@@ -347,7 +349,6 @@ export default {
 			try {
 				const app = getApp().globalData.cloudbase;
 				const userInfo = uni.getStorageSync('userInfo');
-
 				const res = await app.callFunction({
 					name: 'mysql-api',
 					data: {
@@ -357,7 +358,6 @@ export default {
 						role: userInfo.role
 					}
 				});
-
 				if (res.result.code === 0) {
 					uni.showToast({ title: '删除成功', icon: 'success' });
 					this.loadGoodsList();
@@ -527,7 +527,6 @@ export default {
 			// #endif
 		},
 
-		// 打开编辑弹窗
 		openEditForm(goods) {
 			this.editFormData = {
 				id: goods.id,
@@ -541,12 +540,10 @@ export default {
 			this.showEditPopup = true;
 		},
 
-		// 关闭编辑弹窗
 		closeEditForm() {
 			this.showEditPopup = false;
 		},
 
-		// 选择编辑图片
 		chooseEditImage() {
 			uni.chooseImage({
 				count: 1,
@@ -554,7 +551,6 @@ export default {
 				sourceType: ['album', 'camera'],
 				success: async (res) => {
 					const tempPath = res.tempFilePaths[0];
-					// 先压缩图片
 					uni.compressImage({
 						src: tempPath,
 						quality: 60,
@@ -573,7 +569,6 @@ export default {
 							}
 						},
 						fail: async () => {
-							// 压缩失败用原图
 							try {
 								uni.showLoading({ title: '处理中...' });
 								const base64 = await this.imageToBase64(tempPath);
@@ -631,12 +626,10 @@ export default {
 			});
 		},
 
-		// 删除编辑图片
 		removeEditImage() {
 			this.editFormData.image_url = '';
 		},
 
-		// 扫码录入条码（编辑表单）
 		scanBarcodeForEdit() {
 			// #ifdef H5
 			uni.showModal({
@@ -681,7 +674,6 @@ export default {
 			// #endif
 		},
 
-		// 提交编辑表单
 		async submitEditForm() {
 			if (!this.editFormData.name) {
 				uni.showToast({ title: '请输入商品名称', icon: 'none' });
@@ -707,7 +699,6 @@ export default {
 					uni.showToast({ title: '用户信息不完整', icon: 'none' });
 					return;
 				}
-
 				const res = await app.callFunction({
 					name: 'mysql-api',
 					data: {
@@ -725,7 +716,6 @@ export default {
 						role: userInfo.role
 					}
 				});
-
 				if (res.result.code === 0) {
 					uni.showToast({ title: '修改成功', icon: 'success' });
 					this.closeEditForm();
@@ -742,123 +732,138 @@ export default {
 };
 </script>
 
-<style>
-.content {
+<style lang="scss">
+/* ============================================================
+   1. 页面基底
+   ============================================================ */
+.page {
 	min-height: 100vh;
-	background: #f5f6fa;
-	padding: 30rpx;
-	padding-bottom: 160rpx;
+	background: #FAFAFA;
+	padding: 0 24rpx;
+	padding-bottom: 180rpx;
 }
 
-/* 页面头部 */
-.page-header {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	border-radius: 24rpx;
-	padding: 40rpx;
-	margin-bottom: 30rpx;
-	box-shadow: 0 10rpx 40rpx rgba(102, 126, 234, 0.3);
+.status-bar {
+	width: 100%;
 }
 
-.header-title {
+/* ============================================================
+   2. 顶栏：标题 + 导出
+   ============================================================ */
+.top-bar {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 30rpx;
+	justify-content: space-between;
+	padding: 20rpx 8rpx 16rpx;
 }
 
-.title-text {
+.top-title-row {
+	display: flex;
+	align-items: baseline;
+	gap: 16rpx;
+}
+
+.page-title {
 	font-size: 40rpx;
-	font-weight: bold;
-	color: #ffffff;
+	font-weight: 700;
+	color: #1F2937;
 }
 
-.title-count {
-	font-size: 26rpx;
-	color: rgba(255, 255, 255, 0.9);
-	background: rgba(255, 255, 255, 0.2);
-	padding: 8rpx 20rpx;
+.goods-count {
+	font-size: 24rpx;
+	color: #9CA3AF;
+	background: #F3F4F6;
+	padding: 4rpx 16rpx;
 	border-radius: 20rpx;
 }
 
-
-	.export-btn {
-		display: flex;
-		align-items: center;
-		gap: 8rpx;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 20rpx;
-		padding: 12rpx 24rpx;
-		margin-bottom: 15rpx;
-	}
-
-	.export-text {
-		color: #fff;
-		font-size: 24rpx;
-	}
-.header-stats {
+.export-btn {
 	display: flex;
-	justify-content: space-around;
-	background: rgba(255, 255, 255, 0.15);
-	border-radius: 16rpx;
-	padding: 25rpx;
+	align-items: center;
+	gap: 8rpx;
+	background: rgba(79, 70, 229, 0.06);
+	border-radius: 32rpx;
+	padding: 14rpx 28rpx;
 }
 
-.stat-item {
-	text-align: center;
-}
-
-.stat-value {
-	display: block;
-	font-size: 32rpx;
-	font-weight: bold;
-	color: #ffffff;
-	margin-bottom: 8rpx;
-}
-
-.stat-value.profit {
-	color: #ffeb3b;
-}
-
-.stat-label {
-	display: block;
+.export-text {
 	font-size: 24rpx;
-	color: rgba(255, 255, 255, 0.8);
+	color: #4F46E5;
+	font-weight: 500;
 }
 
-/* 商品列表 */
+/* ============================================================
+   3. 财务仪表盘 — 纯白卡片
+   ============================================================ */
+.dashboard {
+	background: #FFFFFF;
+	border-radius: 16px;
+	padding: 32rpx 16rpx;
+	display: flex;
+	align-items: center;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+	margin-bottom: 24rpx;
+}
+
+.dash-item {
+	flex: 1;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	gap: 8rpx;
+}
+
+.dash-label {
+	font-size: 24rpx;
+	color: #9CA3AF;
+}
+
+.dash-value {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1F2937;
+	font-family: "SF Mono", "Menlo", "Consolas", monospace;
+}
+
+.dash-profit {
+	color: #10B981;
+}
+
+.dash-divider {
+	width: 2rpx;
+	height: 48rpx;
+	background: #F3F4F6;
+}
+
+/* ============================================================
+   4. 商品列表卡片
+   ============================================================ */
 .goods-list {
 	display: flex;
 	flex-direction: column;
-	gap: 20rpx;
+	gap: 12px;
 }
 
 .goods-card {
 	display: flex;
-	background: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
-	transition: transform 0.2s;
-}
-
-.goods-card:active {
-	transform: scale(0.98);
+	background: #FFFFFF;
+	border-radius: 16px;
+	padding: 28rpx 24rpx;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
 }
 
 .card-main {
 	flex: 1;
+	min-width: 0;
 }
 
-.goods-header {
-	margin-bottom: 20rpx;
-}
-
-.goods-name-row {
+.goods-row {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 20rpx;
 }
 
+/* 头像 */
 .goods-avatar {
 	width: 80rpx;
 	height: 80rpx;
@@ -884,116 +889,120 @@ export default {
 
 .avatar-letter {
 	font-size: 34rpx;
-	font-weight: bold;
-	color: #ffffff;
+	font-weight: 700;
+	color: #FFFFFF;
 }
 
-.goods-name-col {
+/* 商品信息 */
+.goods-info {
 	flex: 1;
 	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6rpx;
+}
+
+.goods-name-row {
+	display: flex;
+	align-items: center;
 }
 
 .goods-name {
-	display: block;
-	font-size: 34rpx;
-	font-weight: bold;
-	color: #333;
-	margin-bottom: 6rpx;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #1F2937;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
 .goods-barcode {
-	display: block;
-	font-size: 24rpx;
-	color: #999;
+	font-size: 22rpx;
+	color: #9CA3AF;
 	font-family: monospace;
 }
 
-.goods-prices {
+/* ============================================================
+   5. 价格标签 — 极淡底色
+   ============================================================ */
+.price-tags {
 	display: flex;
-	gap: 15rpx;
+	gap: 12rpx;
+	margin-top: 4rpx;
 }
 
 .price-tag {
 	display: flex;
 	align-items: center;
-	padding: 10rpx 20rpx;
-	border-radius: 10rpx;
-	gap: 10rpx;
-}
-
-.price-tag.purchase {
-	background: #eef0ff;
-}
-
-.price-tag.selling {
-	background: #e8f5e9;
-}
-
-.price-tag.profit {
-	background: #fff0f0;
+	gap: 6rpx;
+	padding: 6rpx 16rpx;
+	border-radius: 8rpx;
 }
 
 .tag-label {
-	font-size: 22rpx;
-	font-weight: bold;
-	padding: 4rpx 10rpx;
-	border-radius: 6rpx;
-}
-
-.price-tag.purchase .tag-label {
-	background: #667eea;
-	color: #fff;
-}
-
-.price-tag.selling .tag-label {
-	background: #4caf50;
-	color: #fff;
-}
-
-.price-tag.profit .tag-label {
-	background: #ff6b6b;
-	color: #fff;
+	font-size: 20rpx;
+	font-weight: 600;
 }
 
 .tag-value {
-	font-size: 28rpx;
-	font-weight: bold;
-	color: #333;
+	font-size: 24rpx;
+	font-weight: 600;
+	font-family: "SF Mono", "Menlo", "Consolas", monospace;
 }
 
+/* 进价 — 淡灰底深灰字 */
+.tag-purchase {
+	background: #F3F4F6;
+	.tag-label { color: #6B7280; }
+	.tag-value { color: #4B5563; }
+}
+
+/* 售价 — 淡蓝底深蓝字 */
+.tag-selling {
+	background: rgba(79, 70, 229, 0.06);
+	.tag-label { color: #6366F1; }
+	.tag-value { color: #4F46E5; }
+}
+
+/* 利润 — 淡绿底深绿字 */
+.tag-profit {
+	background: rgba(16, 185, 129, 0.08);
+	.tag-label { color: #10B981; }
+	.tag-value { color: #059669; }
+}
+
+/* ============================================================
+   6. 操作按钮 — 极简图标
+   ============================================================ */
 .card-actions {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	justify-content: center;
-	margin-left: 20rpx;
-	gap: 15rpx;
+	gap: 20rpx;
+	margin-left: 16rpx;
+	flex-shrink: 0;
 }
 
 .action-btn {
-	width: 72rpx;
-	height: 72rpx;
+	width: 56rpx;
+	height: 56rpx;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border: none;
-	padding: 0;
-	margin: 0;
 }
 
-.action-btn.edit {
-	background: #eef0ff;
+.btn-edit {
+	background: transparent;
 }
 
-.action-btn.delete {
-	background: #fff0f0;
+.btn-delete {
+	background: transparent;
 }
 
-/* 空状态 */
+/* ============================================================
+   7. 空状态
+   ============================================================ */
 .empty-state {
 	display: flex;
 	flex-direction: column;
@@ -1003,43 +1012,46 @@ export default {
 }
 
 .empty-icon {
-	width: 200rpx;
-	height: 200rpx;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	width: 180rpx;
+	height: 180rpx;
+	background: linear-gradient(135deg, #4F46E5, #818CF8);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-bottom: 40rpx;
-	box-shadow: 0 10rpx 40rpx rgba(102, 126, 234, 0.3);
+	margin-bottom: 36rpx;
+	box-shadow: 0 12rpx 36rpx rgba(79, 70, 229, 0.2);
 }
 
 .empty-title {
-	font-size: 36rpx;
-	font-weight: bold;
-	color: #333;
-	margin-bottom: 15rpx;
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #1F2937;
+	margin-bottom: 12rpx;
 }
 
 .empty-desc {
-	font-size: 28rpx;
-	color: #999;
-	margin-bottom: 40rpx;
+	font-size: 26rpx;
+	color: #9CA3AF;
+	margin-bottom: 36rpx;
 }
 
 .empty-btn {
-	width: 300rpx;
-	height: 90rpx;
-	line-height: 90rpx;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
+	width: 320rpx;
+	height: 88rpx;
+	line-height: 88rpx;
+	background: #4F46E5;
+	color: #FFFFFF;
 	font-size: 30rpx;
-	font-weight: 500;
-	border-radius: 45rpx;
-	box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
+	font-weight: 600;
+	border-radius: 44rpx;
+	border: none;
+	box-shadow: 0 8rpx 24rpx rgba(79, 70, 229, 0.25);
 }
 
-/* 弹窗 */
+/* ============================================================
+   8. 弹窗
+   ============================================================ */
 .popup {
 	position: fixed;
 	top: 0;
@@ -1057,13 +1069,13 @@ export default {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(0, 0, 0, 0.5);
+	background: rgba(0, 0, 0, 0.4);
 }
 
 .popup-content {
 	width: 100%;
-	background: #ffffff;
-	border-radius: 40rpx 40rpx 0 0;
+	background: #FFFFFF;
+	border-radius: 32rpx 32rpx 0 0;
 	padding: 40rpx;
 	padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
 	position: relative;
@@ -1076,35 +1088,32 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 40rpx;
+	margin-bottom: 36rpx;
 }
 
 .popup-title {
-	font-size: 40rpx;
-	font-weight: bold;
-	color: #333;
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
 .popup-close {
-	width: 60rpx;
-	height: 60rpx;
+	width: 56rpx;
+	height: 56rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #f5f6fa;
+	background: #F3F4F6;
 	border-radius: 50%;
-	border: none;
-	padding: 0;
-	margin: 0;
 }
 
 /* 表单 */
 .form {
-	margin-bottom: 40rpx;
+	margin-bottom: 36rpx;
 }
 
 .form-item {
-	margin-bottom: 30rpx;
+	margin-bottom: 28rpx;
 }
 
 .form-row {
@@ -1118,37 +1127,38 @@ export default {
 
 .form-label {
 	display: block;
-	font-size: 28rpx;
-	color: #333;
-	margin-bottom: 15rpx;
+	font-size: 26rpx;
+	color: #374151;
+	margin-bottom: 12rpx;
 	font-weight: 500;
 }
 
 .required {
-	color: #ff6b6b;
+	color: #EF4444;
 }
 
 .form-input {
 	width: 100%;
-	height: 90rpx;
-	background: #f5f6fa;
+	height: 88rpx;
+	background: #F9FAFB;
 	border-radius: 12rpx;
-	padding: 0 25rpx;
-	font-size: 30rpx;
+	padding: 0 24rpx;
+	font-size: 28rpx;
+	color: #1F2937;
 	border: 2rpx solid transparent;
 	transition: border-color 0.2s;
-}
 
-.form-input:focus {
-	border-color: #667eea;
+	&:focus {
+		border-color: #4F46E5;
+	}
 }
 
 .input-with-unit {
 	display: flex;
 	align-items: center;
-	background: #f5f6fa;
+	background: #F9FAFB;
 	border-radius: 12rpx;
-	padding-right: 25rpx;
+	padding-right: 24rpx;
 }
 
 .input-with-unit .form-input {
@@ -1157,14 +1167,13 @@ export default {
 }
 
 .unit {
-	font-size: 28rpx;
-	color: #666;
+	font-size: 26rpx;
+	color: #6B7280;
 }
 
-/* 条码输入行 */
 .barcode-input-row {
 	display: flex;
-	gap: 15rpx;
+	gap: 16rpx;
 	align-items: center;
 }
 
@@ -1173,39 +1182,41 @@ export default {
 }
 
 .scan-barcode-btn {
-	width: 160rpx;
-	height: 90rpx;
+	width: 150rpx;
+	height: 88rpx;
 	padding: 0;
 	margin: 0;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
-	font-size: 26rpx;
+	background: #4F46E5;
+	color: #FFFFFF;
+	font-size: 24rpx;
 	border-radius: 12rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8rpx;
+	gap: 6rpx;
+	border: none;
 }
 
 .form-textarea {
 	width: 100%;
-	height: 160rpx;
-	background: #f5f6fa;
+	height: 150rpx;
+	background: #F9FAFB;
 	border-radius: 12rpx;
-	padding: 20rpx 25rpx;
-	font-size: 30rpx;
+	padding: 20rpx 24rpx;
+	font-size: 28rpx;
+	color: #1F2937;
 	border: 2rpx solid transparent;
 }
 
 .char-count {
 	display: block;
 	text-align: right;
-	font-size: 24rpx;
-	color: #999;
-	margin-top: 10rpx;
+	font-size: 22rpx;
+	color: #9CA3AF;
+	margin-top: 8rpx;
 }
 
-/* 弹窗底部 */
+/* 弹窗底部按钮 */
 .popup-footer {
 	display: flex;
 	gap: 20rpx;
@@ -1215,24 +1226,25 @@ export default {
 .btn-cancel,
 .btn-submit {
 	flex: 1;
-	height: 90rpx;
-	line-height: 90rpx;
-	font-size: 32rpx;
-	font-weight: 500;
+	height: 88rpx;
+	line-height: 88rpx;
+	font-size: 30rpx;
+	font-weight: 600;
 	border-radius: 16rpx;
 	padding: 0;
 	margin: 0;
+	border: none;
 }
 
 .btn-cancel {
-	background: #f5f6fa;
-	color: #666;
+	background: #F3F4F6;
+	color: #6B7280;
 }
 
 .btn-submit {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
-	box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
+	background: #4F46E5;
+	color: #FFFFFF;
+	box-shadow: 0 6rpx 20rpx rgba(79, 70, 229, 0.25);
 }
 
 /* 图片选择 */
@@ -1242,32 +1254,32 @@ export default {
 }
 
 .image-add-box {
-	width: 180rpx;
-	height: 180rpx;
-	border: 4rpx dashed #ccc;
+	width: 170rpx;
+	height: 170rpx;
+	border: 3rpx dashed #D1D5DB;
 	border-radius: 16rpx;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 10rpx;
-	background: #fafafa;
+	gap: 8rpx;
+	background: #F9FAFB;
 }
 
 .image-add-text {
-	font-size: 24rpx;
-	color: #bbb;
+	font-size: 22rpx;
+	color: #9CA3AF;
 }
 
 .image-preview {
 	position: relative;
-	width: 180rpx;
-	height: 180rpx;
+	width: 170rpx;
+	height: 170rpx;
 }
 
 .preview-img {
-	width: 180rpx;
-	height: 180rpx;
+	width: 170rpx;
+	height: 170rpx;
 	border-radius: 16rpx;
 }
 
@@ -1277,15 +1289,17 @@ export default {
 	right: -12rpx;
 	width: 40rpx;
 	height: 40rpx;
-	background: #ff6b6b;
+	background: #EF4444;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border: 4rpx solid #fff;
+	border: 3rpx solid #FFFFFF;
 }
 
-/* 详情弹窗 */
+/* ============================================================
+   9. 详情弹窗
+   ============================================================ */
 .detail-popup-content {
 	display: flex;
 	flex-direction: column;
@@ -1295,19 +1309,19 @@ export default {
 .detail-image-area {
 	display: flex;
 	justify-content: center;
-	margin-bottom: 30rpx;
+	margin-bottom: 28rpx;
 }
 
 .detail-main-image {
-	width: 400rpx;
-	height: 400rpx;
+	width: 360rpx;
+	height: 360rpx;
 	border-radius: 20rpx;
-	background: #f5f6fa;
+	background: #F9FAFB;
 }
 
 .detail-avatar-large {
-	width: 160rpx;
-	height: 160rpx;
+	width: 150rpx;
+	height: 150rpx;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
@@ -1315,26 +1329,26 @@ export default {
 }
 
 .detail-avatar-letter {
-	font-size: 72rpx;
-	font-weight: bold;
-	color: #ffffff;
+	font-size: 64rpx;
+	font-weight: 700;
+	color: #FFFFFF;
 }
 
 .detail-goods-name {
-	font-size: 42rpx;
-	font-weight: bold;
-	color: #333;
-	margin-bottom: 30rpx;
+	font-size: 38rpx;
+	font-weight: 700;
+	color: #1F2937;
+	margin-bottom: 28rpx;
 	text-align: center;
 }
 
 .detail-price-row {
 	display: flex;
 	width: 100%;
-	background: #f5f6fa;
+	background: #F9FAFB;
 	border-radius: 16rpx;
-	padding: 30rpx 0;
-	margin-bottom: 30rpx;
+	padding: 28rpx 0;
+	margin-bottom: 28rpx;
 }
 
 .detail-price-item {
@@ -1343,33 +1357,30 @@ export default {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 10rpx;
+	gap: 8rpx;
 }
 
 .detail-price-item:not(:last-child) {
-	border-right: 2rpx solid #e0e0e0;
+	border-right: 2rpx solid #E5E7EB;
 }
 
 .detail-price-label {
-	font-size: 24rpx;
-	color: #999;
+	font-size: 22rpx;
+	color: #9CA3AF;
 }
 
 .detail-price-value {
-	font-size: 32rpx;
-	font-weight: bold;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
-.detail-price-value.purchase {
-	color: #667eea;
+.detail-selling {
+	color: #4F46E5;
 }
 
-.detail-price-value.selling {
-	color: #4caf50;
-}
-
-.detail-price-value.profit {
-	color: #ff6b6b;
+.detail-profit {
+	color: #10B981;
 }
 
 .detail-info-row {
@@ -1377,24 +1388,24 @@ export default {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 24rpx 0;
-	border-bottom: 2rpx solid #f0f0f0;
+	padding: 22rpx 0;
+	border-bottom: 1px solid #F3F4F6;
 }
 
 .detail-info-label {
-	font-size: 28rpx;
-	color: #999;
+	font-size: 26rpx;
+	color: #9CA3AF;
 }
 
 .detail-info-value {
-	font-size: 28rpx;
-	color: #333;
+	font-size: 26rpx;
+	color: #1F2937;
 	flex: 1;
 	text-align: right;
 }
 
 .detail-info-value.has-image {
-	color: #667eea;
+	color: #4F46E5;
 	font-weight: 500;
 }
 
@@ -1404,19 +1415,20 @@ export default {
 
 .detail-close-area {
 	width: 100%;
-	margin-top: 40rpx;
+	margin-top: 36rpx;
 }
 
 .detail-close-btn {
 	width: 100%;
-	height: 90rpx;
-	line-height: 90rpx;
-	font-size: 32rpx;
+	height: 88rpx;
+	line-height: 88rpx;
+	font-size: 30rpx;
 	font-weight: 500;
 	border-radius: 16rpx;
-	background: #f5f6fa;
-	color: #666;
+	background: #F3F4F6;
+	color: #6B7280;
 	padding: 0;
 	margin: 0;
+	border: none;
 }
 </style>
