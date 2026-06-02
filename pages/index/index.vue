@@ -46,7 +46,7 @@
 			<!-- 扫码查价 · 淡蓝 -->
 			<view class="feature-card card-scan" @click="scanCode">
 				<view class="feature-icon-wrap">
-					<uni-icons type="scan" size="34" color="#4F46E5"></uni-icons>
+					<uni-icons type="scan" size="34" color="#00A8B5"></uni-icons>
 				</view>
 				<text class="feature-label">扫码查价</text>
 				<text class="feature-desc">扫描条码查价格</text>
@@ -104,7 +104,7 @@
 		<!-- ===== 空状态 ===== -->
 		<view class="empty-state" v-if="!scannedGoods && !searchKeyword">
 			<view class="empty-icon-circle">
-				<uni-icons type="scan" size="40" color="#4F46E5"></uni-icons>
+				<uni-icons type="scan" size="40" color="#00A8B5"></uni-icons>
 			</view>
 			<text class="empty-title">扫描商品条码</text>
 			<text class="empty-sub">快速查询价格 / 扫码结账 / 添加新商品</text>
@@ -294,7 +294,7 @@ export default {
 	right: 0;
 	height: 360rpx;
 	background: linear-gradient(180deg,
-		rgba(79, 70, 229, 0.04) 0%,
+		rgba(0, 168, 181, 0.04) 0%,
 		rgba(99, 102, 241, 0.02) 30%,
 		rgba(255, 255, 255, 0) 100%
 	);
@@ -324,12 +324,12 @@ export default {
 	width: 88rpx;
 	height: 88rpx;
 	border-radius: 50%;
-	background: linear-gradient(135deg, #4F46E5, #818CF8);
+	background: linear-gradient(135deg, #00A8B5, #007BFF);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
-	box-shadow: 0 4rpx 16rpx rgba(79, 70, 229, 0.18);
+	box-shadow: 0 4rpx 16rpx rgba(0, 168, 181, 0.18);
 }
 
 .avatar-text {
@@ -373,12 +373,12 @@ export default {
 	width: 10rpx;
 	height: 10rpx;
 	border-radius: 50%;
-	background: #4F46E5;
+	background: #00A8B5;
 }
 
 .shop-name {
 	font-size: 22rpx;
-	color: #4F46E5;
+	color: #00A8B5;
 	font-weight: 500;
 }
 
@@ -452,7 +452,7 @@ export default {
 
 /* 扫码查价 — 淡蓝 */
 .card-scan {
-	background: rgba(79, 70, 229, 0.06);
+	background: rgba(0, 168, 181, 0.06);
 }
 
 /* 扫码结账 — 淡红 */
@@ -516,13 +516,13 @@ export default {
 }
 
 .result-badge {
-	background: rgba(79, 70, 229, 0.08);
+	background: rgba(0, 168, 181, 0.08);
 	border-radius: 12rpx;
 	padding: 6rpx 16rpx;
 
 	text {
 		font-size: 22rpx;
-		color: #4F46E5;
+		color: #00A8B5;
 		font-weight: 500;
 	}
 }
@@ -602,7 +602,7 @@ export default {
 	width: 140rpx;
 	height: 140rpx;
 	border-radius: 50%;
-	background: rgba(79, 70, 229, 0.06);
+	background: rgba(0, 168, 181, 0.06);
 	display: flex;
 	align-items: center;
 	justify-content: center;

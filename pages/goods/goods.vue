@@ -10,7 +10,7 @@
 				<text class="goods-count" v-if="goodsList.length > 0">{{ goodsList.length }}件</text>
 			</view>
 			<view class="export-btn" v-if="goodsList.length > 0" @click="exportToExcel">
-				<uni-icons type="download" size="16" color="#4F46E5"></uni-icons>
+				<uni-icons type="download" size="16" color="#00A8B5"></uni-icons>
 				<text class="export-text">导出</text>
 			</view>
 		</view>
@@ -300,14 +300,14 @@ export default {
 	methods: {
 		getAvatarColor(name) {
 			const colors = [
-				'linear-gradient(135deg, #667eea, #764ba2)',
-				'linear-gradient(135deg, #f093fb, #f5576c)',
-				'linear-gradient(135deg, #4facfe, #00f2fe)',
-				'linear-gradient(135deg, #43e97b, #38f9d7)',
-				'linear-gradient(135deg, #fa709a, #fee140)',
-				'linear-gradient(135deg, #a18cd1, #fbc2eb)',
-				'linear-gradient(135deg, #fccb90, #d57eeb)',
-				'linear-gradient(135deg, #e0c3fc, #8ec5fc)'
+				'linear-gradient(135deg, #00A8B5, #007BFF)',
+				'linear-gradient(135deg, #10B981, #059669)',
+				'linear-gradient(135deg, #F59E0B, #D97706)',
+				'linear-gradient(135deg, #EF4444, #DC2626)',
+				'linear-gradient(135deg, #8B5CF6, #7C3AED)',
+				'linear-gradient(135deg, #EC4899, #DB2777)',
+				'linear-gradient(135deg, #06B6D4, #0891B2)',
+				'linear-gradient(135deg, #F97316, #EA580C)'
 			];
 			let hash = 0;
 			for (let i = 0; i < name.length; i++) {
@@ -815,7 +815,7 @@ export default {
 
 .export-text {
 	font-size: 24rpx;
-	color: #4F46E5;
+	color: #00A8B5;
 	font-weight: 500;
 }
 
@@ -988,7 +988,7 @@ export default {
 .tag-selling {
 	background: rgba(79, 70, 229, 0.06);
 	.tag-label { color: #6366F1; }
-	.tag-value { color: #4F46E5; }
+	.tag-value { color: #00A8B5; }
 }
 
 /* 利润 — 淡绿底深绿字 */
@@ -1175,7 +1175,7 @@ export default {
 	transition: border-color 0.2s;
 
 	&:focus {
-		border-color: #4F46E5;
+		border-color: #00A8B5;
 	}
 }
 
@@ -1212,7 +1212,7 @@ export default {
 	height: 88rpx;
 	padding: 0;
 	margin: 0;
-	background: #4F46E5;
+	background: #00A8B5;
 	color: #FFFFFF;
 	font-size: 24rpx;
 	border-radius: 12rpx;
@@ -1268,7 +1268,7 @@ export default {
 }
 
 .btn-submit {
-	background: #4F46E5;
+	background: #00A8B5;
 	color: #FFFFFF;
 	box-shadow: 0 6rpx 20rpx rgba(79, 70, 229, 0.25);
 }
@@ -1414,7 +1414,7 @@ export default {
 }
 
 .detail-selling {
-	color: #4F46E5;
+	color: #00A8B5;
 }
 
 .detail-profit {
@@ -1442,7 +1442,7 @@ export default {
 }
 
 .detail-info-value.has-image {
-	color: #4F46E5;
+	color: #00A8B5;
 	font-weight: 500;
 }
 
@@ -1480,7 +1480,7 @@ export default {
 .detail-edit-btn {
 	width: 100%;
 	height: 96rpx;
-	background: linear-gradient(135deg, #4F46E5, #6366F1);
+	background: linear-gradient(135deg, #00A8B5, #007BFF);
 	border-radius: 48rpx;
 	display: flex;
 	align-items: center;

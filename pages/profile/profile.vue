@@ -21,7 +21,7 @@
 		<view class="info-card" v-if="userInfo && userInfo.shop_id">
 			<view class="card-head">
 				<view class="card-head-left">
-					<uni-icons type="shop" size="18" color="#4F46E5"></uni-icons>
+					<uni-icons type="shop" size="18" color="#00A8B5"></uni-icons>
 					<text class="card-head-title">店铺信息</text>
 				</view>
 			</view>
@@ -48,7 +48,7 @@
 		<view class="info-card" v-if="userInfo && userInfo.role === 'store_manager'">
 			<view class="card-head">
 				<view class="card-head-left">
-					<uni-icons type="locked" size="18" color="#4F46E5"></uni-icons>
+					<uni-icons type="locked" size="18" color="#00A8B5"></uni-icons>
 					<text class="card-head-title">邀请码管理</text>
 				</view>
 				<text class="card-head-sub">多人共用，无限使用</text>
@@ -70,7 +70,7 @@
 				</view>
 			</view>
 			<view class="refresh-row" @click="loadInviteCodes">
-				<uni-icons type="refresh" size="16" color="#4F46E5"></uni-icons>
+				<uni-icons type="refresh" size="16" color="#00A8B5"></uni-icons>
 				<text class="refresh-text">刷新邀请码</text>
 			</view>
 		</view>
@@ -79,7 +79,7 @@
 		<view class="info-card" v-if="userInfo && (userInfo.role === 'store_manager' || userInfo.role === 'manager')">
 			<view class="card-head">
 				<view class="card-head-left">
-					<uni-icons type="staff" size="18" color="#4F46E5"></uni-icons>
+					<uni-icons type="staff" size="18" color="#00A8B5"></uni-icons>
 					<text class="card-head-title">员工管理</text>
 				</view>
 			</view>
@@ -121,7 +121,7 @@
 			</view>
 
 			<view class="refresh-row" @click="loadStaffList">
-				<uni-icons type="refresh" size="16" color="#4F46E5"></uni-icons>
+				<uni-icons type="refresh" size="16" color="#00A8B5"></uni-icons>
 				<text class="refresh-text">刷新列表</text>
 			</view>
 		</view>
@@ -434,7 +434,7 @@ export default {
 	width: 104rpx;
 	height: 104rpx;
 	border-radius: 50%;
-	background: linear-gradient(135deg, #4F46E5, #818CF8);
+	background: linear-gradient(135deg, #00A8B5, #007BFF);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -480,7 +480,7 @@ export default {
 
 .role-capsule.staff {
 	background: rgba(79, 70, 229, 0.06);
-	.role-text { color: #4F46E5; }
+	.role-text { color: #00A8B5; }
 }
 
 .role-text {
@@ -562,7 +562,7 @@ export default {
 
 	&.mono {
 		font-family: monospace;
-		color: #4F46E5;
+		color: #00A8B5;
 	}
 }
 
@@ -570,7 +570,7 @@ export default {
 .action-link {
 	font-size: 24rpx;
 	font-weight: 500;
-	color: #4F46E5;
+	color: #00A8B5;
 	padding: 4rpx 0;
 
 	&:active {
@@ -579,7 +579,7 @@ export default {
 }
 
 .edit-link {
-	color: #4F46E5;
+	color: #00A8B5;
 }
 
 .danger-link {
@@ -671,7 +671,7 @@ export default {
 	width: 56rpx;
 	height: 56rpx;
 	border-radius: 50%;
-	background: linear-gradient(135deg, #4F46E5, #818CF8);
+	background: linear-gradient(135deg, #00A8B5, #007BFF);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -716,7 +716,7 @@ export default {
 
 .refresh-text {
 	font-size: 24rpx;
-	color: #4F46E5;
+	color: #00A8B5;
 	font-weight: 500;
 }
 
