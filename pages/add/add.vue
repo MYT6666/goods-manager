@@ -427,11 +427,11 @@ export default {
 	width: 100%;
 	height: 88rpx;
 	background: #F9FAFB;
-	border-radius: 12rpx;
+	border-radius: 8px;
 	padding: 0 22rpx;
 	font-size: 28rpx;
 	color: #1F2937;
-	border: 1px solid #F3F4F6;
+	border: 1px solid #E5E7EB;
 	transition: border-color 0.2s;
 
 	&:focus {
@@ -558,7 +558,8 @@ export default {
 	width: 100%;
 	height: 90rpx;
 	line-height: 90rpx;
-	background: #4F46E5;
+	background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+	box-shadow: 0 6rpx 24rpx rgba(79, 70, 229, 0.28);
 	color: #FFFFFF;
 	font-size: 30rpx;
 	font-weight: 600;

@@ -407,11 +407,11 @@ export default {
 	flex: 1;
 	height: 80rpx;
 	background: #F9FAFB;
-	border-radius: 12rpx;
+	border-radius: 8px;
 	padding: 0 22rpx;
 	font-size: 26rpx;
 	color: #1F2937;
-	border: 1px solid #F3F4F6;
+	border: 1px solid #E5E7EB;
 }
 
 .search-btn {
@@ -707,7 +707,8 @@ export default {
 	align-items: center;
 	justify-content: center;
 	padding: 0 36rpx;
-	background: #4F46E5;
+	background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+	box-shadow: 0 4rpx 20rpx rgba(79, 70, 229, 0.25);
 }
 
 .pay-text {

@@ -619,7 +619,7 @@ export default {
 .code-val {
 	font-size: 32rpx;
 	font-weight: 700;
-	color: #1F2937;
+	color: #6B7280;
 	font-family: monospace;
 	letter-spacing: 2rpx;
 }
@@ -746,6 +746,7 @@ export default {
 	&:active {
 		background: rgba(239, 68, 68, 0.12);
 	}
+ padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ============================================================
