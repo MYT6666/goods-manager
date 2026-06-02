@@ -89,11 +89,11 @@
 		<!-- ===== 空状态 ===== -->
 		<view class="empty-state" v-else>
 			<view class="empty-icon">
-				<uni-icons type="shop" size="48" color="#FFFFFF"></uni-icons>
+				<uni-icons type="shop" size="48" color="#9CA3AF"></uni-icons>
 			</view>
 			<text class="empty-title">暂无商品</text>
-			<text class="empty-desc">点击首页"新增商品"开始添加</text>
-			<button class="empty-btn" @click="goToHome">去添加商品</button>
+			<text class="empty-desc">先去添加一件吧</text>
+			<button class="empty-btn" @click="goToAdd">去添加商品</button>
 		</view>
 
 		<!-- ==================== 编辑弹窗 ==================== -->
@@ -398,6 +398,9 @@ export default {
 		closeDetailPopup() {
 			this.showDetailPopup = false;
 			this.detailGoods = {};
+		},
+		goToAdd() {
+			uni.switchTab({ url: '/pages/add/add' });
 		},
 		goToHome() {
 			uni.switchTab({ url: '/pages/index/index' });
@@ -1036,15 +1039,14 @@ export default {
 }
 
 .empty-icon {
-	width: 180rpx;
-	height: 180rpx;
-	background: linear-gradient(135deg, #4F46E5, #818CF8);
+	width: 170rpx;
+	height: 170rpx;
+	background: #F3F4F6;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	margin-bottom: 36rpx;
-	box-shadow: 0 12rpx 36rpx rgba(79, 70, 229, 0.2);
 }
 
 .empty-title {
@@ -1064,7 +1066,7 @@ export default {
 	width: 320rpx;
 	height: 88rpx;
 	line-height: 88rpx;
-	background: #4F46E5;
+	background: linear-gradient(135deg, #00A8B5 0%, #007BFF 100%);
 	color: #FFFFFF;
 	font-size: 30rpx;
 	font-weight: 600;
