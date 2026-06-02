@@ -1,105 +1,121 @@
 <template>
-	<view class="content">
-		<!-- 顶部扫码区域 -->
+	<view class="page">
+		<!-- ===== 状态栏占位 ===== -->
 		<view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
-		<view class="scan-section">
-			<view class="scan-header">
-				<text class="scan-title">扫码结账</text>
-				<text class="scan-desc">扫描商品条码添加到购物车</text>
-			</view>
-			<view class="scan-actions">
-				<button class="scan-btn" @click="scanCode">
-					<uni-icons type="scan" size="24" color="#fff"></uni-icons>
-					<text class="scan-text">扫描条码</text>
+
+		<!-- ===== 极简标题 ===== -->
+		<view class="page-header">
+			<text class="page-title">扫码结账</text>
+			<text class="page-sub">扫描商品条码添加到购物车</text>
+		</view>
+
+		<!-- ===== 操作卡片：扫描 + 输入 ===== -->
+		<view class="action-card">
+			<button class="scan-btn" @click="scanCode">
+				<uni-icons type="scan" size="22" color="#4F46E5"></uni-icons>
+				<text class="scan-text">扫描条码</text>
+			</button>
+			<view class="manual-input">
+				<input
+					type="text"
+					v-model="manualKeyword"
+					placeholder="输入条码或商品名称"
+					class="barcode-input"
+					@confirm="searchAndAdd"
+					confirm-type="search"
+					cursor-spacing="20"
+				/>
+				<button class="search-btn" @click="searchAndAdd">
+					<uni-icons type="search" size="16" color="#FFFFFF"></uni-icons>
+					<text>搜索</text>
 				</button>
-				<view class="manual-input">
-					<input type="text" v-model="manualKeyword" placeholder="输入条码或商品名称" class="barcode-input" @confirm="searchAndAdd" confirm-type="search" cursor-spacing="20" />
-					<button class="add-btn" @click="searchAndAdd">
-						<uni-icons type="search" size="18" color="#fff"></uni-icons>
-						<text>搜索</text>
-					</button>
-				</view>
 			</view>
 		</view>
 
-		<!-- 搜索结果选择 -->
-		<view class="search-result-section" v-if="searchResults.length > 0">
-			<view class="search-result-header">
-				<text class="search-result-title">搜索结果</text>
-				<text class="search-result-count">{{ searchResults.length }}个商品</text>
+		<!-- ===== 搜索结果 ===== -->
+		<view class="card-section" v-if="searchResults.length > 0">
+			<view class="card-section-head">
+				<text class="card-section-title">搜索结果</text>
+				<text class="card-section-badge">{{ searchResults.length }}个</text>
 			</view>
-			<view class="search-result-list">
-				<view class="search-result-item" v-for="(item, index) in searchResults" :key="index" @click="selectSearchItem(item)">
-					<view class="sri-info">
-						<text class="sri-name">{{ item.name }}</text>
-						<text class="sri-barcode">{{ item.barcode }}</text>
+			<view class="search-list">
+				<view
+					class="search-item"
+					v-for="(item, index) in searchResults"
+					:key="index"
+					@click="selectSearchItem(item)"
+				>
+					<view class="search-item-info">
+						<text class="search-item-name">{{ item.name }}</text>
+						<text class="search-item-barcode">{{ item.barcode }}</text>
 					</view>
-					<view class="sri-right">
-						<text class="sri-price">¥{{ parseFloat(item.selling_price).toFixed(2) }}</text>
-						<uni-icons type="plus-filled" size="22" color="#667eea"></uni-icons>
+					<view class="search-item-right">
+						<text class="search-item-price">¥{{ parseFloat(item.selling_price).toFixed(2) }}</text>
+						<uni-icons type="plus-filled" size="22" color="#4F46E5"></uni-icons>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<!-- 购物车列表 -->
-		<view class="cart-section" v-if="cartItems.length > 0">
-			<view class="cart-header">
+		<!-- ===== 购物车 ===== -->
+		<view class="card-section" v-if="cartItems.length > 0">
+			<view class="card-section-head">
 				<view class="cart-title-row">
-					<uni-icons type="cart" size="20" color="#667eea"></uni-icons>
-					<text class="cart-title">购物车</text>
+					<uni-icons type="cart" size="18" color="#4F46E5"></uni-icons>
+					<text class="card-section-title">购物车</text>
 				</view>
-				<text class="cart-count">{{ totalItems }}件商品</text>
+				<text class="card-section-badge">{{ totalItems }}件</text>
 			</view>
-
 			<view class="cart-list">
 				<view class="cart-item" v-for="(item, index) in cartItems" :key="index">
-					<view class="item-info">
-						<text class="item-name">{{ item.name }}</text>
-						<text class="item-barcode">{{ item.barcode }}</text>
+					<view class="cart-item-info">
+						<text class="cart-item-name">{{ item.name }}</text>
+						<text class="cart-item-barcode">{{ item.barcode }}</text>
 					</view>
-					<view class="item-right">
-						<view class="quantity-control">
-							<button class="qty-btn minus" @click="changeQuantity(index, -1)">
-								<uni-icons type="minus" size="14" color="#ff6b6b"></uni-icons>
-							</button>
-							<text class="qty-value">{{ item.quantity }}</text>
-							<button class="qty-btn plus" @click="changeQuantity(index, 1)">
-								<uni-icons type="plus" size="14" color="#667eea"></uni-icons>
-							</button>
+					<view class="cart-item-right">
+						<view class="qty-ctrl">
+							<view class="qty-btn" @click="changeQuantity(index, -1)">
+								<uni-icons type="minus" size="12" color="#EF4444"></uni-icons>
+							</view>
+							<text class="qty-val">{{ item.quantity }}</text>
+							<view class="qty-btn" @click="changeQuantity(index, 1)">
+								<uni-icons type="plus" size="12" color="#4F46E5"></uni-icons>
+							</view>
 						</view>
-						<text class="item-subtotal">¥{{ (item.selling_price * item.quantity).toFixed(2) }}</text>
-						<button class="remove-btn" @click="removeItem(index)">
-							<uni-icons type="closeempty" size="16" color="#ff6b6b"></uni-icons>
-						</button>
+						<text class="cart-item-subtotal">¥{{ (item.selling_price * item.quantity).toFixed(2) }}</text>
+						<view class="remove-btn" @click="removeItem(index)">
+							<uni-icons type="closeempty" size="16" color="#FCA5A5"></uni-icons>
+						</view>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<!-- 空购物车 -->
+		<!-- ===== 空购物车 ===== -->
 		<view class="empty-cart" v-else>
-			<uni-icons type="cart" size="64" color="#d0d3e8"></uni-icons>
-			<text class="empty-text">购物车为空</text>
+			<view class="empty-icon-wrap">
+				<uni-icons type="cart" size="48" color="#9CA3AF"></uni-icons>
+			</view>
+			<text class="empty-title">购物车为空</text>
 			<text class="empty-hint">扫描商品条码开始结账</text>
 		</view>
 
-		<!-- 底部结算栏 -->
+		<!-- ===== 结算栏 ===== -->
 		<view class="checkout-bar" v-if="cartItems.length > 0">
-			<view class="bar-left" @click="clearCart">
-				<uni-icons type="trash" size="18" color="#999"></uni-icons>
+			<view class="bar-clear" @click="clearCart">
+				<uni-icons type="trash" size="18" color="#9CA3AF"></uni-icons>
 				<text class="clear-text">清空</text>
 			</view>
-			<view class="bar-center">
-				<text class="total-label">合计：</text>
+			<view class="bar-total">
+				<text class="total-label">合计</text>
 				<text class="total-amount">¥{{ totalAmount }}</text>
 			</view>
-			<view class="bar-right" @click="checkout">
-				<text class="checkout-text">结账({{ totalItems }})</text>
+			<view class="bar-pay" @click="checkout">
+				<text class="pay-text">结账({{ totalItems }})</text>
 			</view>
 		</view>
 
-		<!-- 自定义TabBar -->
+		<!-- ===== 底部导航 ===== -->
 		<tab-bar :currentIndex="3"></tab-bar>
 	</view>
 </template>
@@ -134,7 +150,6 @@ export default {
 		}
 	},
 	methods: {
-		// 扫码
 		scanCode() {
 			// #ifdef H5
 			uni.showModal({
@@ -178,7 +193,6 @@ export default {
 			// #endif
 		},
 
-		// 手动搜索商品
 		async searchAndAdd() {
 			const keyword = this.manualKeyword.trim();
 			if (!keyword) {
@@ -192,7 +206,6 @@ export default {
 					uni.showToast({ title: '用户信息不完整', icon: 'none' });
 					return;
 				}
-
 				const res = await app.callFunction({
 					name: 'mysql-api',
 					data: {
@@ -202,15 +215,12 @@ export default {
 						role: userInfo.role
 					}
 				});
-
 				if (res.result.code === 0 && res.result.data.length > 0) {
 					if (res.result.data.length === 1) {
-						// 只有一个结果，直接添加
 						this.addToCart(res.result.data[0]);
 						this.searchResults = [];
 						this.manualKeyword = '';
 					} else {
-						// 多个结果，显示选择列表
 						this.searchResults = res.result.data;
 					}
 				} else {
@@ -223,14 +233,12 @@ export default {
 			}
 		},
 
-		// 选择搜索结果中的商品
 		selectSearchItem(goods) {
 			this.addToCart(goods);
 			this.searchResults = [];
 			this.manualKeyword = '';
 		},
 
-		// 根据条码查询商品并添加到购物车
 		async queryAndAdd(barcode) {
 			try {
 				const app = getApp().globalData.cloudbase;
@@ -239,7 +247,6 @@ export default {
 					uni.showToast({ title: '用户信息不完整', icon: 'none' });
 					return;
 				}
-
 				const res = await app.callFunction({
 					name: 'mysql-api',
 					data: {
@@ -249,7 +256,6 @@ export default {
 						role: userInfo.role
 					}
 				});
-
 				if (res.result.code === 0 && res.result.data.length > 0) {
 					const goods = res.result.data[0];
 					this.addToCart(goods);
@@ -262,7 +268,6 @@ export default {
 			}
 		},
 
-		// 添加到购物车
 		addToCart(goods) {
 			const existIndex = this.cartItems.findIndex(item => item.id === goods.id);
 			if (existIndex >= 0) {
@@ -280,7 +285,6 @@ export default {
 			uni.showToast({ title: '已添加', icon: 'success' });
 		},
 
-		// 修改数量
 		changeQuantity(index, delta) {
 			const item = this.cartItems[index];
 			const newQty = item.quantity + delta;
@@ -291,12 +295,10 @@ export default {
 			this.$set(this.cartItems[index], 'quantity', newQty);
 		},
 
-		// 移除商品
 		removeItem(index) {
 			this.cartItems.splice(index, 1);
 		},
 
-		// 清空购物车
 		clearCart() {
 			uni.showModal({
 				title: '确认清空',
@@ -310,15 +312,13 @@ export default {
 			});
 		},
 
-		// 结账
 		checkout() {
 			if (this.cartItems.length === 0) return;
-
-			const items = this.cartItems.map(item => `${item.name} x${item.quantity}`).join('\n');
+			const items = this.cartItems.map(item => item.name + ' x' + item.quantity).join('\n');
 			uni.showModal({
 				title: '确认结账',
-				content: `${items}\n\n合计：¥${this.totalAmount}`,
-				confirmColor: '#11998e',
+				content: items + '\n\n合计：¥' + this.totalAmount,
+				confirmColor: '#10B981',
 				success: (res) => {
 					if (res.confirm) {
 						uni.showToast({ title: '结账成功', icon: 'success' });
@@ -331,196 +331,124 @@ export default {
 };
 </script>
 
-<style>
-.content {
+<style lang="scss">
+/* ============================================================
+   1. 页面基底
+   ============================================================ */
+.page {
 	min-height: 100vh;
-	background: #f5f6fa;
-	padding: 30rpx;
-	padding-bottom: calc(420rpx + env(safe-area-inset-bottom));
+	background: #FAFAFA;
+	padding: 0 24rpx;
+	padding-bottom: calc(360rpx + env(safe-area-inset-bottom));
 }
 
-/* 扫码区域 */
-.scan-section {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	border-radius: 20rpx;
-	padding: 40rpx;
-	margin-bottom: 30rpx;
-	box-shadow: 0 10rpx 40rpx rgba(102, 126, 234, 0.3);
+.status-bar {
+	width: 100%;
 }
 
-.scan-header {
-	margin-bottom: 30rpx;
+/* ============================================================
+   2. 极简标题
+   ============================================================ */
+.page-header {
+	padding: 20rpx 8rpx 24rpx;
 }
 
-.scan-title {
+.page-title {
 	display: block;
 	font-size: 40rpx;
-	font-weight: bold;
-	color: #ffffff;
-	margin-bottom: 10rpx;
+	font-weight: 700;
+	color: #1F2937;
+	margin-bottom: 8rpx;
 }
 
-.scan-desc {
+.page-sub {
 	display: block;
 	font-size: 26rpx;
-	color: rgba(255, 255, 255, 0.8);
+	color: #9CA3AF;
 }
 
-.scan-actions {
-	display: flex;
-	flex-direction: column;
-	gap: 20rpx;
+/* ============================================================
+   3. 操作卡片
+   ============================================================ */
+.action-card {
+	background: #FFFFFF;
+	border-radius: 16px;
+	padding: 28rpx;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+	margin-bottom: 16rpx;
 }
 
 .scan-btn {
 	width: 100%;
-	height: 100rpx;
-	background: rgba(255, 255, 255, 0.2);
-	border: 2rpx solid rgba(255, 255, 255, 0.4);
-	border-radius: 16rpx;
+	height: 96rpx;
+	background: rgba(79, 70, 229, 0.06);
+	border-radius: 14rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 15rpx;
+	gap: 12rpx;
 	padding: 0;
-	margin: 0;
+	margin: 0 0 20rpx 0;
+	border: none;
 }
 
 .scan-text {
-	font-size: 34rpx;
-	font-weight: bold;
-	color: #ffffff;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #4F46E5;
 }
 
 .manual-input {
 	display: flex;
-	gap: 15rpx;
+	gap: 14rpx;
 }
 
 .barcode-input {
 	flex: 1;
 	height: 80rpx;
-	background: rgba(255, 255, 255, 0.2);
-	border: 2rpx solid rgba(255, 255, 255, 0.3);
+	background: #F9FAFB;
 	border-radius: 12rpx;
-	padding: 0 25rpx;
-	font-size: 28rpx;
-	color: #ffffff;
+	padding: 0 22rpx;
+	font-size: 26rpx;
+	color: #1F2937;
+	border: 1px solid #F3F4F6;
 }
 
-.add-btn {
+.search-btn {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 6rpx;
-	width: 140rpx;
+	width: 130rpx;
 	height: 80rpx;
-	background: rgba(255, 255, 255, 0.3);
-	color: #ffffff;
-	font-size: 28rpx;
-	font-weight: bold;
+	background: #4F46E5;
+	color: #FFFFFF;
+	font-size: 26rpx;
+	font-weight: 500;
 	border-radius: 12rpx;
 	padding: 0;
 	margin: 0;
 	border: none;
 }
 
-/* 搜索结果区域 */
-.search-result-section {
-	background: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	margin-bottom: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+/* ============================================================
+   4. 通用卡片区域
+   ============================================================ */
+.card-section {
+	background: #FFFFFF;
+	border-radius: 16px;
+	padding: 28rpx;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+	margin-bottom: 16rpx;
 }
 
-.search-result-header {
+.card-section-head {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 20rpx;
-}
-
-.search-result-title {
-	font-size: 30rpx;
-	font-weight: bold;
-	color: #333;
-}
-
-.search-result-count {
-	font-size: 24rpx;
-	color: #667eea;
-	background: #eef0fb;
-	padding: 6rpx 16rpx;
-	border-radius: 15rpx;
-}
-
-.search-result-list {
-	display: flex;
-	flex-direction: column;
-	gap: 15rpx;
-}
-
-.search-result-item {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 20rpx 24rpx;
-	background: #f8f9fc;
-	border-radius: 16rpx;
-	transition: background 0.15s;
-}
-
-.search-result-item:active {
-	background: #eef0fb;
-}
-
-.sri-info {
-	flex: 1;
-}
-
-.sri-name {
-	display: block;
-	font-size: 28rpx;
-	font-weight: bold;
-	color: #333;
-	margin-bottom: 6rpx;
-}
-
-.sri-barcode {
-	display: block;
-	font-size: 22rpx;
-	color: #999;
-	font-family: monospace;
-}
-
-.sri-right {
-	display: flex;
-	align-items: center;
-	gap: 16rpx;
-}
-
-.sri-price {
-	font-size: 28rpx;
-	font-weight: bold;
-	color: #667eea;
-}
-
-/* 购物车区域 */
-.cart-section {
-	background: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
-}
-
-.cart-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 25rpx;
-	padding-bottom: 20rpx;
-	border-bottom: 2rpx solid #f0f0f0;
+	padding-bottom: 18rpx;
+	border-bottom: 1px solid #F3F4F6;
 }
 
 .cart-title-row {
@@ -529,194 +457,262 @@ export default {
 	gap: 10rpx;
 }
 
-.cart-title {
-	font-size: 34rpx;
-	font-weight: bold;
-	color: #333;
+.card-section-title {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
-.cart-count {
-	font-size: 24rpx;
-	color: #667eea;
-	background: #eef0fb;
-	padding: 6rpx 16rpx;
-	border-radius: 15rpx;
+.card-section-badge {
+	font-size: 22rpx;
+	color: #4F46E5;
+	background: rgba(79, 70, 229, 0.06);
+	padding: 4rpx 14rpx;
+	border-radius: 16rpx;
 }
 
+/* ============================================================
+   5. 搜索结果列表
+   ============================================================ */
+.search-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+
+.search-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18rpx 20rpx;
+	background: #F9FAFB;
+	border-radius: 12rpx;
+}
+
+.search-item-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.search-item-name {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #1F2937;
+	margin-bottom: 4rpx;
+}
+
+.search-item-barcode {
+	display: block;
+	font-size: 22rpx;
+	color: #9CA3AF;
+	font-family: monospace;
+}
+
+.search-item-right {
+	display: flex;
+	align-items: center;
+	gap: 14rpx;
+	flex-shrink: 0;
+}
+
+.search-item-price {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #4F46E5;
+}
+
+/* ============================================================
+   6. 购物车列表
+   ============================================================ */
 .cart-list {
 	display: flex;
 	flex-direction: column;
-	gap: 20rpx;
+	gap: 12rpx;
 }
 
 .cart-item {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 20rpx;
-	background: #f8f9fc;
-	border-radius: 16rpx;
+	padding: 18rpx 20rpx;
+	background: #F9FAFB;
+	border-radius: 12rpx;
 }
 
-.item-info {
+.cart-item-info {
 	flex: 1;
-	margin-right: 20rpx;
+	min-width: 0;
+	margin-right: 16rpx;
 }
 
-.item-name {
+.cart-item-name {
 	display: block;
 	font-size: 28rpx;
-	font-weight: bold;
-	color: #333;
-	margin-bottom: 6rpx;
+	font-weight: 600;
+	color: #1F2937;
+	margin-bottom: 4rpx;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	max-width: 280rpx;
 }
 
-.item-barcode {
+.cart-item-barcode {
 	display: block;
 	font-size: 22rpx;
-	color: #999;
+	color: #9CA3AF;
 	font-family: monospace;
 }
 
-.item-right {
+.cart-item-right {
 	display: flex;
 	align-items: center;
-	gap: 20rpx;
+	gap: 16rpx;
+	flex-shrink: 0;
 }
 
-.quantity-control {
+.qty-ctrl {
 	display: flex;
 	align-items: center;
-	gap: 10rpx;
+	gap: 8rpx;
 }
 
 .qty-btn {
-	width: 64rpx;
-	height: 64rpx;
-	padding: 0;
-	margin: 0;
-	background: #ffffff;
-	border: 2rpx solid #e8e8e8;
-	border-radius: 32rpx;
+	width: 52rpx;
+	height: 52rpx;
+	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	background: #FFFFFF;
+	border: 1px solid #E5E7EB;
 }
 
-.qty-value {
-	font-size: 30rpx;
-	font-weight: bold;
-	color: #333;
-	min-width: 40rpx;
+.qty-val {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #1F2937;
+	min-width: 36rpx;
 	text-align: center;
 }
 
-.item-subtotal {
-	font-size: 30rpx;
-	font-weight: bold;
-	color: #667eea;
-	min-width: 120rpx;
+.cart-item-subtotal {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #4F46E5;
+	min-width: 110rpx;
 	text-align: right;
 }
 
 .remove-btn {
-	width: 64rpx;
-	height: 64rpx;
-	padding: 0;
-	margin: 0;
-	background: #fff0f0;
-	border-radius: 32rpx;
+	width: 52rpx;
+	height: 52rpx;
+	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	background: transparent;
 	border: none;
+	padding: 0;
+	margin: 0;
 }
 
-/* 空购物车 */
+/* ============================================================
+   7. 空购物车
+   ============================================================ */
 .empty-cart {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
 	padding: 100rpx 40rpx;
 }
 
-.empty-text {
-	font-size: 34rpx;
-	font-weight: bold;
-	color: #333;
-	margin-top: 30rpx;
-	margin-bottom: 15rpx;
+.empty-icon-wrap {
+	width: 130rpx;
+	height: 130rpx;
+	border-radius: 50%;
+	background: #F3F4F6;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 24rpx;
+}
+
+.empty-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1F2937;
+	margin-bottom: 10rpx;
 }
 
 .empty-hint {
-	font-size: 26rpx;
-	color: #999;
+	font-size: 24rpx;
+	color: #9CA3AF;
 }
 
-/* 底部结算栏 - 京东风格 */
+/* ============================================================
+   8. 结算栏
+   ============================================================ */
 .checkout-bar {
 	position: fixed;
-	left: 0;
-	right: 0;
-	bottom: calc(110rpx + env(safe-area-inset-bottom));
+	left: 24rpx;
+	right: 24rpx;
+	bottom: calc(126rpx + env(safe-area-inset-bottom));
 	height: 100rpx;
-	background: #ffffff;
+	background: #FFFFFF;
+	border-radius: 20rpx;
 	display: flex;
 	align-items: center;
-	box-shadow: 0 -2rpx 16rpx rgba(0, 0, 0, 0.08);
+	box-shadow: 0 -2rpx 20rpx rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
 	z-index: 100;
+	overflow: hidden;
 }
 
-.bar-left {
+.bar-clear {
 	display: flex;
 	align-items: center;
-	gap: 8rpx;
-	padding: 0 30rpx;
+	gap: 6rpx;
+	padding: 0 24rpx;
 	height: 100%;
 }
 
 .clear-text {
-	font-size: 26rpx;
-	color: #999;
+	font-size: 24rpx;
+	color: #9CA3AF;
 }
 
-.bar-center {
+.bar-total {
 	flex: 1;
 	display: flex;
-	align-items: center;
+	align-items: baseline;
 	justify-content: flex-end;
-	padding-right: 24rpx;
-	gap: 4rpx;
+	padding-right: 20rpx;
+	gap: 6rpx;
 }
 
 .total-label {
-	font-size: 26rpx;
-	color: #333;
+	font-size: 24rpx;
+	color: #6B7280;
 }
 
 .total-amount {
 	font-size: 36rpx;
-	font-weight: bold;
-	color: #ff4757;
+	font-weight: 700;
+	color: #EF4444;
 }
 
-.bar-right {
+.bar-pay {
 	height: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0 40rpx;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	padding: 0 36rpx;
+	background: #4F46E5;
 }
 
-.checkout-text {
-	font-size: 30rpx;
-	font-weight: bold;
-	color: #ffffff;
+.pay-text {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #FFFFFF;
 }
 </style>

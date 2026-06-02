@@ -1,29 +1,51 @@
 <template>
-	<view class="content">
+	<view class="page">
+		<!-- ===== 状态栏占位 ===== -->
 		<view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+
+		<!-- ===== 极简标题 ===== -->
 		<view class="page-header">
-			<text class="header-title">新增商品</text>
-			<text class="header-desc">填写商品信息并保存</text>
+			<text class="page-title">新增商品</text>
+			<text class="page-sub">填写商品信息并保存</text>
 		</view>
 
+		<!-- ===== 表单卡片 ===== -->
 		<view class="form-card">
 			<view class="form-item">
 				<text class="form-label">商品名称 <text class="required">*</text></text>
-				<input type="text" v-model="formData.name" placeholder="请输入商品名称" class="form-input" cursor-spacing="20" />
+				<input
+					type="text"
+					v-model="formData.name"
+					placeholder="请输入商品名称"
+					class="form-input"
+					cursor-spacing="20"
+				/>
 			</view>
 
 			<view class="form-row">
 				<view class="form-item half">
 					<text class="form-label">进价 <text class="required">*</text></text>
 					<view class="input-with-unit">
-						<input type="digit" v-model.number="formData.purchase_price" placeholder="0.00" class="form-input" cursor-spacing="20" />
+						<input
+							type="digit"
+							v-model.number="formData.purchase_price"
+							placeholder="0.00"
+							class="form-input"
+							cursor-spacing="20"
+						/>
 						<text class="unit">元</text>
 					</view>
 				</view>
 				<view class="form-item half">
 					<text class="form-label">卖价 <text class="required">*</text></text>
 					<view class="input-with-unit">
-						<input type="digit" v-model.number="formData.selling_price" placeholder="0.00" class="form-input" cursor-spacing="20" />
+						<input
+							type="digit"
+							v-model.number="formData.selling_price"
+							placeholder="0.00"
+							class="form-input"
+							cursor-spacing="20"
+						/>
 						<text class="unit">元</text>
 					</view>
 				</view>
@@ -32,9 +54,15 @@
 			<view class="form-item">
 				<text class="form-label">商品条码 <text class="required">*</text></text>
 				<view class="barcode-input-row">
-					<input type="text" v-model="formData.barcode" placeholder="请输入或扫描商品条码" class="form-input barcode-input" cursor-spacing="20" />
+					<input
+						type="text"
+						v-model="formData.barcode"
+						placeholder="请输入或扫描商品条码"
+						class="form-input barcode-input"
+						cursor-spacing="20"
+					/>
 					<button class="scan-barcode-btn" @click="scanBarcodeForForm">
-						<uni-icons type="scan" size="18" color="#ffffff"></uni-icons>
+						<uni-icons type="scan" size="16" color="#FFFFFF"></uni-icons>
 						<text>扫码</text>
 					</button>
 				</view>
@@ -43,27 +71,33 @@
 			<view class="form-item">
 				<text class="form-label">商品图片</text>
 				<view v-if="!tempImagePath" class="image-picker" @click="chooseImage">
-					<uni-icons type="camera" size="40" color="#bbb"></uni-icons>
+					<uni-icons type="camera" size="36" color="#D1D5DB"></uni-icons>
 					<text class="image-picker-text">添加图片</text>
 				</view>
 				<view v-else class="image-preview">
 					<image :src="tempImagePath" mode="aspectFill" class="preview-img" @click="chooseImage"></image>
 					<view class="image-delete" @click="removeImage">
-						<uni-icons type="closeempty" size="14" color="#ffffff"></uni-icons>
+						<uni-icons type="closeempty" size="14" color="#FFFFFF"></uni-icons>
 					</view>
 				</view>
 			</view>
 
 			<view class="form-item">
 				<text class="form-label">备注</text>
-				<textarea v-model="formData.remark" placeholder="可选填" class="form-textarea" :maxlength="100" cursor-spacing="20" />
+				<textarea
+					v-model="formData.remark"
+					placeholder="可选填"
+					class="form-textarea"
+					:maxlength="100"
+					cursor-spacing="20"
+				/>
 				<text class="char-count">{{ (formData.remark && formData.remark.length) || 0 }}/100</text>
 			</view>
 
 			<button class="submit-btn" @click="submitForm">保存商品</button>
 		</view>
 
-		<!-- 自定义TabBar -->
+		<!-- ===== 底部导航 ===== -->
 		<tab-bar :currentIndex="2"></tab-bar>
 	</view>
 </template>
@@ -92,7 +126,6 @@ export default {
 		if (options && options.barcode) {
 			this.formData.barcode = options.barcode;
 		}
-
 		const userInfo = uni.getStorageSync('userInfo');
 		if (!userInfo || !userInfo.id || !userInfo.shop_id) {
 			uni.reLaunch({ url: '/pages/login/login' });
@@ -110,7 +143,6 @@ export default {
 				sourceType: ['album', 'camera'],
 				success: (res) => {
 					const tempPath = res.tempFilePaths[0];
-					// 压缩图片后再使用
 					uni.compressImage({
 						src: tempPath,
 						quality: 60,
@@ -120,7 +152,6 @@ export default {
 							this.tempImagePath = compRes.tempFilePath;
 						},
 						fail: () => {
-							// 压缩失败则用原图
 							this.tempImagePath = tempPath;
 						}
 					});
@@ -135,7 +166,6 @@ export default {
 
 		async uploadImage() {
 			if (!this.tempImagePath) return;
-			// 将图片转为 base64 存储
 			const base64 = await this.imageToBase64(this.tempImagePath);
 			this.formData.image_url = base64;
 		},
@@ -254,7 +284,6 @@ export default {
 					return;
 				}
 
-				// 上传图片（如果有）
 				if (this.tempImagePath && !this.formData.image_url) {
 					try {
 						await this.uploadImage();
@@ -323,45 +352,54 @@ export default {
 };
 </script>
 
-<style>
-.content {
+<style lang="scss">
+/* ============================================================
+   1. 页面基底
+   ============================================================ */
+.page {
 	min-height: 100vh;
-	background: #f5f6fa;
-	padding: 30rpx;
-	padding-bottom: 160rpx;
+	background: #FAFAFA;
+	padding: 0 24rpx;
+	padding-bottom: 180rpx;
 }
 
+.status-bar {
+	width: 100%;
+}
+
+/* ============================================================
+   2. 极简标题
+   ============================================================ */
 .page-header {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	border-radius: 24rpx;
-	padding: 40rpx;
-	margin-bottom: 30rpx;
-	box-shadow: 0 10rpx 40rpx rgba(102, 126, 234, 0.3);
+	padding: 20rpx 8rpx 24rpx;
 }
 
-.header-title {
+.page-title {
 	display: block;
 	font-size: 40rpx;
-	font-weight: bold;
-	color: #ffffff;
-	margin-bottom: 10rpx;
+	font-weight: 700;
+	color: #1F2937;
+	margin-bottom: 8rpx;
 }
 
-.header-desc {
+.page-sub {
 	display: block;
 	font-size: 26rpx;
-	color: rgba(255, 255, 255, 0.8);
+	color: #9CA3AF;
 }
 
+/* ============================================================
+   3. 表单卡片
+   ============================================================ */
 .form-card {
-	background: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+	background: #FFFFFF;
+	border-radius: 16px;
+	padding: 32rpx 28rpx;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
 }
 
 .form-item {
-	margin-bottom: 30rpx;
+	margin-bottom: 28rpx;
 }
 
 .form-row {
@@ -375,52 +413,56 @@ export default {
 
 .form-label {
 	display: block;
-	font-size: 28rpx;
-	color: #333;
-	margin-bottom: 15rpx;
+	font-size: 26rpx;
+	color: #374151;
+	margin-bottom: 12rpx;
 	font-weight: 500;
 }
 
 .required {
-	color: #ff6b6b;
+	color: #EF4444;
 }
 
 .form-input {
 	width: 100%;
-	height: 90rpx;
-	background: #f5f6fa;
+	height: 88rpx;
+	background: #F9FAFB;
 	border-radius: 12rpx;
-	padding: 0 25rpx;
-	font-size: 30rpx;
-	border: 2rpx solid transparent;
+	padding: 0 22rpx;
+	font-size: 28rpx;
+	color: #1F2937;
+	border: 1px solid #F3F4F6;
 	transition: border-color 0.2s;
-}
 
-.form-input:focus {
-	border-color: #667eea;
+	&:focus {
+		border-color: #4F46E5;
+	}
 }
 
 .input-with-unit {
 	display: flex;
 	align-items: center;
-	background: #f5f6fa;
+	background: #F9FAFB;
 	border-radius: 12rpx;
-	padding-right: 25rpx;
+	padding-right: 22rpx;
+	border: 1px solid #F3F4F6;
 }
 
 .input-with-unit .form-input {
 	background: transparent;
 	flex: 1;
+	border: none;
 }
 
 .unit {
-	font-size: 28rpx;
-	color: #666;
+	font-size: 26rpx;
+	color: #6B7280;
 }
 
+/* 条码输入 */
 .barcode-input-row {
 	display: flex;
-	gap: 15rpx;
+	gap: 14rpx;
 	align-items: center;
 }
 
@@ -429,92 +471,102 @@ export default {
 }
 
 .scan-barcode-btn {
-	width: 160rpx;
-	height: 90rpx;
+	width: 140rpx;
+	height: 88rpx;
 	padding: 0;
 	margin: 0;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
-	font-size: 26rpx;
+	background: #4F46E5;
+	color: #FFFFFF;
+	font-size: 24rpx;
+	font-weight: 500;
 	border-radius: 12rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8rpx;
+	gap: 6rpx;
+	border: none;
+	box-shadow: 0 4rpx 16rpx rgba(79, 70, 229, 0.2);
 }
 
+/* 备注 */
 .form-textarea {
 	width: 100%;
-	height: 160rpx;
-	background: #f5f6fa;
+	height: 150rpx;
+	background: #F9FAFB;
 	border-radius: 12rpx;
-	padding: 20rpx 25rpx;
-	font-size: 30rpx;
-	border: 2rpx solid transparent;
+	padding: 18rpx 22rpx;
+	font-size: 28rpx;
+	color: #1F2937;
+	border: 1px solid #F3F4F6;
 }
 
 .char-count {
 	display: block;
 	text-align: right;
-	font-size: 24rpx;
-	color: #999;
-	margin-top: 10rpx;
+	font-size: 22rpx;
+	color: #9CA3AF;
+	margin-top: 8rpx;
 }
 
+/* 图片 */
 .image-picker {
-	width: 200rpx;
-	height: 200rpx;
-	border: 4rpx dashed #ccc;
-	border-radius: 12rpx;
+	width: 180rpx;
+	height: 180rpx;
+	border: 3rpx dashed #D1D5DB;
+	border-radius: 14rpx;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 10rpx;
+	gap: 8rpx;
+	background: #F9FAFB;
 }
 
 .image-picker-text {
-	font-size: 24rpx;
-	color: #bbb;
+	font-size: 22rpx;
+	color: #9CA3AF;
 }
 
 .image-preview {
 	position: relative;
-	width: 200rpx;
-	height: 200rpx;
+	width: 180rpx;
+	height: 180rpx;
 }
 
 .preview-img {
-	width: 200rpx;
-	height: 200rpx;
-	border-radius: 12rpx;
+	width: 180rpx;
+	height: 180rpx;
+	border-radius: 14rpx;
 }
 
 .image-delete {
 	position: absolute;
-	top: -16rpx;
-	right: -16rpx;
+	top: -14rpx;
+	right: -14rpx;
 	width: 40rpx;
 	height: 40rpx;
-	background: rgba(0, 0, 0, 0.5);
+	background: #EF4444;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border: 3rpx solid #FFFFFF;
 }
 
+/* 提交按钮 */
 .submit-btn {
 	width: 100%;
 	height: 90rpx;
 	line-height: 90rpx;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
-	font-size: 32rpx;
-	font-weight: 500;
-	border-radius: 16rpx;
+	background: #4F46E5;
+	color: #FFFFFF;
+	font-size: 30rpx;
+	font-weight: 600;
+	border-radius: 14rpx;
 	padding: 0;
 	margin: 0;
 	margin-top: 20rpx;
-	box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
+	border: none;
+	box-shadow: 0 6rpx 24rpx rgba(79, 70, 229, 0.25);
 }
 </style>
