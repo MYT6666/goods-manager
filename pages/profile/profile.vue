@@ -123,6 +123,12 @@
 			<text>退出登录</text>
 		</button>
 
+		<!-- 注销账号 -->
+		<button class="delete-account-btn" @click="deleteAccount">
+			<uni-icons type="trash" size="20" color="#999"></uni-icons>
+			<text>注销账号</text>
+		</button>
+
 		<!-- 自定义TabBar -->
 		<tab-bar :currentIndex="4"></tab-bar>
 	</view>
@@ -338,6 +344,33 @@ export default {
 				}
 			});
 		}
+		deleteAccount() {
+			uni.showModal({
+				title: "注销账号",
+				content: "注销后所有数据将被清除，此操作不可恢复。",
+				confirmText: "确认注销",
+				confirmColor: "#ff6b6b",
+				success: async (res) => {
+					if (res.confirm) {
+						try {
+							uni.showLoading({ title: "注销中..." });
+							const app = getApp().globalData.cloudbase;
+							await app.callFunction({
+								name: "user-auth",
+								data: { action: "deleteAccount" }
+							});
+							uni.removeStorageSync("userInfo");
+							uni.hideLoading();
+							uni.showToast({ title: "账号已注销", icon: "success" });
+							setTimeout(() => uni.reLaunch({ url: "/pages/login/login" }), 1500);
+						} catch (err) {
+							uni.hideLoading();
+							uni.showToast({ title: "注销失败，请重试", icon: "none" });
+						}
+					}
+				}
+			});
+		},
 	}
 };
 </script>
@@ -650,6 +683,27 @@ export default {
 	align-items: center;
 	justify-content: center;
 	gap: 10rpx;
+}
+
+/* 注销账号 */
+.delete-account-btn {
+	width: 100%;
+	height: 90rpx;
+	line-height: 90rpx;
+	background: #f5f6fa;
+	color: #999;
+	font-size: 30rpx;
+	border: 2rpx solid #e0e0e0;
+	border-radius: 50rpx;
+	margin-top: 20rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10rpx;
+}
+
+.delete-account-btn::after {
+	border: none;
 }
 
 /* 退出登录 */
