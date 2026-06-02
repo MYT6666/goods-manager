@@ -26,43 +26,70 @@ export default {
 
         this.globalData.cloudbase = app;
 
-        // 关键修复：先完成匿名登录，再决定跳转
-        try {
-            await Promise.race([
-                app.auth({ persistence: 'local' }).anonymousAuthProvider().signIn(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('登录超时')), 10000))
-            ]);
-            console.log('✅ 匿名登录成功');
-            
-            // 登录成功后，检查本地用户信息
-            const userInfo = uni.getStorageSync('userInfo');
-            console.log('App Launch - 本地用户信息:', userInfo);
-            
-            if (userInfo && userInfo.shop_id) {
-                console.log('App Launch - 本地已有用户信息，跳转到首页:', {
-                    username: userInfo.username,
-                    shop_id: userInfo.shop_id
-                });
-                // 使用 switchTab 跳转到 tabBar 页面
-                uni.switchTab({
-                    url: '/pages/index/index'
-                });
-            } else {
-                console.log('App Launch - 本地无用户信息，跳转到登录页');
-                uni.reLaunch({
-                    url: '/pages/login/login'
-                });
-            }
-        } catch (err) {
-            console.error('❌ 匿名登录失败', err);
-            // 匿名登录失败不阻止页面显示，让用户可以正常登录
-            console.log('App Launch - 匿名登录失败，继续跳转到登录页');
-            uni.reLaunch({
-                url: '/pages/login/login'
-            });
-        }
+	        // #ifdef H5
+	        // H5: skip anonymous auth to avoid CloudBase domain whitelist blocking
+	        console.log("H5 Launch - skip anonymous auth");
+	        const userInfo = uni.getStorageSync("userInfo");
+	        if (userInfo && userInfo.shop_id) {
+	            uni.switchTab({ url: "/pages/index/index" });
+	        } else {
+	            uni.reLaunch({ url: "/pages/login/login" });
+	        }
+	        // #endif
+
+	        // #ifndef H5
+	        try {
+	            await app.auth({ persistence: "local" }).anonymousAuthProvider().signIn();
+	            console.log("Anonymous auth success");
+	            const userInfo2 = uni.getStorageSync("userInfo");
+	            if (userInfo2 && userInfo2.shop_id) {
+	                uni.switchTab({ url: "/pages/index/index" });
+	            } else {
+	                uni.reLaunch({ url: "/pages/login/login" });
+	            }
+	        } catch (err) {
+	            console.error("Anonymous auth failed", err);
+	            uni.reLaunch({ url: "/pages/login/login" });
+	        }
+	        // #endif
     },
     onShow: function() {
+        console.log('App Show');
+    },
+    onHide: function() {
+        console.log('App Hide');
+    }
+};
+</script>
+
+<style>
+/* 全局样式 */
+</style	        // #ifdef H5
+	        // H5: skip anonymous auth to avoid CloudBase domain whitelist blocking
+	        console.log('H5 Launch - skip anonymous auth');
+	        const userInfo = uni.getStorageSync('userInfo');
+	        if (userInfo && userInfo.shop_id) {
+	            uni.switchTab({ url: '/pages/index/index' });
+	        } else {
+	            uni.reLaunch({ url: '/pages/login/login' });
+	        }
+	        // #endif
+
+	        // #ifndef H5
+	        try {
+	            await app.auth({ persistence: 'local' }).anonymousAuthProvider().signIn();
+	            console.log('Anonymous auth success');
+	            const userInfo = uni.getStorageSync('userInfo');
+	            if (userInfo && userInfo.shop_id) {
+	                uni.switchTab({ url: '/pages/index/index' });
+	            } else {
+	                uni.reLaunch({ url: '/pages/login/login' });
+	            }
+	        } catch (err) {
+	            console.error('Anonymous auth failed', err);
+	            uni.reLaunch({ url: '/pages/login/login' });
+	        }
+	        // #endif    onShow: function() {
         console.log('App Show');
     },
     onHide: function() {
