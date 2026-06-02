@@ -7,6 +7,10 @@
 				<text class="title-text">商品列表</text>
 				<text class="title-count" v-if="goodsList.length > 0">{{ goodsList.length }}件商品</text>
 			</view>
+			<view class="export-btn" v-if="goodsList.length > 0" @click="exportToExcel">
+				<uni-icons type="download" size="14" color="#667eea"></uni-icons>
+				<text class="export-text">导出</text>
+			</view>
 			<view class="header-stats" v-if="goodsList.length > 0">
 				<view class="stat-item">
 					<text class="stat-value">{{ totalPurchase }}</text>
@@ -776,6 +780,21 @@ export default {
 	border-radius: 20rpx;
 }
 
+
+	.export-btn {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 20rpx;
+		padding: 12rpx 24rpx;
+		margin-bottom: 15rpx;
+	}
+
+	.export-text {
+		color: #fff;
+		font-size: 24rpx;
+	}
 .header-stats {
 	display: flex;
 	justify-content: space-around;
