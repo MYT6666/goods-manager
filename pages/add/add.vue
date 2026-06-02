@@ -394,7 +394,7 @@ export default {
 .form-card {
 	background: #FFFFFF;
 	border-radius: 16px;
-	padding: 32rpx 28rpx;
+	padding: 32rpx 28rpx 40rpx;
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
 }
 
@@ -435,7 +435,7 @@ export default {
 	transition: border-color 0.2s;
 
 	&:focus {
-		border-color: #4F46E5;
+		border-color: #00A8B5;
 	}
 }
 
@@ -475,17 +475,17 @@ export default {
 	height: 88rpx;
 	padding: 0;
 	margin: 0;
-	background: #4F46E5;
+	background: linear-gradient(135deg, #00A8B5 0%, #007BFF 100%);
 	color: #FFFFFF;
 	font-size: 24rpx;
 	font-weight: 500;
-	border-radius: 12rpx;
+	border-radius: 8px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 6rpx;
 	border: none;
-	box-shadow: 0 4rpx 16rpx rgba(79, 70, 229, 0.2);
+	box-shadow: 0 4rpx 16rpx rgba(0, 168, 181, 0.2);
 }
 
 /* 备注 */
@@ -558,8 +558,8 @@ export default {
 	width: 100%;
 	height: 90rpx;
 	line-height: 90rpx;
-	background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
-	box-shadow: 0 6rpx 24rpx rgba(79, 70, 229, 0.28);
+	background: linear-gradient(135deg, #00A8B5 0%, #007BFF 100%);
+	box-shadow: 0 6rpx 24rpx rgba(0, 168, 181, 0.28);
 	color: #FFFFFF;
 	font-size: 30rpx;
 	font-weight: 600;

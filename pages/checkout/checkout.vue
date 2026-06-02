@@ -12,7 +12,7 @@
 		<!-- ===== 操作卡片：扫描 + 输入 ===== -->
 		<view class="action-card">
 			<button class="scan-btn" @click="scanCode">
-				<uni-icons type="scan" size="22" color="#4F46E5"></uni-icons>
+				<uni-icons type="scan" size="22" color="#00A8B5"></uni-icons>
 				<text class="scan-text">扫描条码</text>
 			</button>
 			<view class="manual-input">
@@ -51,7 +51,7 @@
 					</view>
 					<view class="search-item-right">
 						<text class="search-item-price">¥{{ parseFloat(item.selling_price).toFixed(2) }}</text>
-						<uni-icons type="plus-filled" size="22" color="#4F46E5"></uni-icons>
+						<uni-icons type="plus-filled" size="22" color="#00A8B5"></uni-icons>
 					</view>
 				</view>
 			</view>
@@ -61,7 +61,7 @@
 		<view class="card-section" v-if="cartItems.length > 0">
 			<view class="card-section-head">
 				<view class="cart-title-row">
-					<uni-icons type="cart" size="18" color="#4F46E5"></uni-icons>
+					<uni-icons type="cart" size="18" color="#00A8B5"></uni-icons>
 					<text class="card-section-title">购物车</text>
 				</view>
 				<text class="card-section-badge">{{ totalItems }}件</text>
@@ -79,7 +79,7 @@
 							</view>
 							<text class="qty-val">{{ item.quantity }}</text>
 							<view class="qty-btn" @click="changeQuantity(index, 1)">
-								<uni-icons type="plus" size="12" color="#4F46E5"></uni-icons>
+								<uni-icons type="plus" size="12" color="#00A8B5"></uni-icons>
 							</view>
 						</view>
 						<text class="cart-item-subtotal">¥{{ (item.selling_price * item.quantity).toFixed(2) }}</text>
@@ -381,7 +381,8 @@ export default {
 .scan-btn {
 	width: 100%;
 	height: 96rpx;
-	background: rgba(79, 70, 229, 0.06);
+	background: rgba(0, 168, 181, 0.06);
+	border: 1px solid rgba(0, 168, 181, 0.1);
 	border-radius: 14rpx;
 	display: flex;
 	align-items: center;
@@ -395,7 +396,7 @@ export default {
 .scan-text {
 	font-size: 30rpx;
 	font-weight: 600;
-	color: #4F46E5;
+	color: #00A8B5;
 }
 
 .manual-input {
@@ -421,11 +422,11 @@ export default {
 	gap: 6rpx;
 	width: 130rpx;
 	height: 80rpx;
-	background: #4F46E5;
+	background: linear-gradient(135deg, #00A8B5 0%, #007BFF 100%);
 	color: #FFFFFF;
 	font-size: 26rpx;
 	font-weight: 500;
-	border-radius: 12rpx;
+	border-radius: 8px;
 	padding: 0;
 	margin: 0;
 	border: none;
@@ -465,7 +466,7 @@ export default {
 
 .card-section-badge {
 	font-size: 22rpx;
-	color: #4F46E5;
+	color: #00A8B5;
 	background: rgba(79, 70, 229, 0.06);
 	padding: 4rpx 14rpx;
 	border-radius: 16rpx;
@@ -519,7 +520,7 @@ export default {
 .search-item-price {
 	font-size: 28rpx;
 	font-weight: 700;
-	color: #4F46E5;
+	color: #00A8B5;
 }
 
 /* ============================================================
@@ -599,7 +600,7 @@ export default {
 .cart-item-subtotal {
 	font-size: 28rpx;
 	font-weight: 700;
-	color: #4F46E5;
+	color: #00A8B5;
 	min-width: 110rpx;
 	text-align: right;
 }
@@ -707,8 +708,8 @@ export default {
 	align-items: center;
 	justify-content: center;
 	padding: 0 36rpx;
-	background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
-	box-shadow: 0 4rpx 20rpx rgba(79, 70, 229, 0.25);
+	background: linear-gradient(135deg, #00A8B5 0%, #007BFF 100%);
+	box-shadow: 0 4rpx 20rpx rgba(0, 168, 181, 0.25);
 }
 
 .pay-text {
