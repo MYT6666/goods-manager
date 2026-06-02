@@ -343,7 +343,7 @@ export default {
 					}
 				}
 			});
-		}
+		},
 		deleteAccount() {
 			uni.showModal({
 				title: "注销账号",
