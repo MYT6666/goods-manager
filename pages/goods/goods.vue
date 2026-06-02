@@ -375,6 +375,154 @@ export default {
 			uni.switchTab({ url: '/pages/index/index' });
 		},
 
+		exportToExcel() {
+			if (this.goodsList.length === 0) {
+				uni.showToast({ title: '暂无商品可导出', icon: 'none' });
+				return;
+			}
+
+			// #ifdef H5
+			const headers = ['序号', '商品名称', '条码', '进价', '售价', '利润', '有图片', '备注', '创建时间'];
+			const rows = this.goodsList.map((item, index) => [
+				index + 1,
+				item.name || '',
+				String.fromCharCode(9) + (item.barcode || ''),
+				parseFloat(item.purchase_price || 0).toFixed(2),
+				parseFloat(item.selling_price || 0).toFixed(2),
+				(parseFloat(item.selling_price || 0) - parseFloat(item.purchase_price || 0)).toFixed(2),
+				item.image_url ? '是' : '否',
+				item.remark || '',
+				item.createdAt || ''
+			]);
+			const csvContent = [String.fromCharCode(0xFEFF) + [headers, ...rows].map(row =>
+				row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')
+			).join(String.fromCharCode(10))];
+			const blob = new Blob(csvContent, { type: 'text/csv;charset=utf-8;' });
+			const link = document.createElement('a');
+			link.href = URL.createObjectURL(blob);
+			link.download = '商品数据.csv';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			URL.revokeObjectURL(link.href);
+			uni.showToast({ title: '导出成功', icon: 'success' });
+			// #endif
+
+			// #ifdef MP-WEIXIN
+			uni.showLoading({ title: '导出中...' });
+			try {
+				const XLSX = require('xlsx');
+				const data = this.goodsList.map((item, index) => ({
+					'序号': index + 1,
+					'商品名称': item.name || '',
+					'条码': item.barcode || '',
+					'进价': parseFloat(item.purchase_price || 0),
+					'售价': parseFloat(item.selling_price || 0),
+					'利润': parseFloat(item.selling_price || 0) - parseFloat(item.purchase_price || 0),
+					'有图片': item.image_url ? '是' : '否',
+					'备注': item.remark || '',
+					'创建时间': item.createdAt || ''
+				}));
+				const worksheet = XLSX.utils.json_to_sheet(data);
+				worksheet['!cols'] = [
+					{ wch: 6 }, { wch: 20 }, { wch: 16 },
+					{ wch: 10 }, { wch: 10 }, { wch: 10 },
+					{ wch: 8 }, { wch: 20 }, { wch: 20 }
+				];
+				for (let i = 1; i <= this.goodsList.length; i++) {
+					['D', 'E', 'F'].forEach(col => {
+						const cell = worksheet[col + (i + 1)];
+						if (cell) cell.z = '0.00';
+					});
+				}
+				const workbook = XLSX.utils.book_new();
+				XLSX.utils.book_append_sheet(workbook, worksheet, '商品列表');
+				const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+				const filePath = wx.env.USER_DATA_PATH + '/商品数据.xlsx';
+				const fs = wx.getFileSystemManager();
+				fs.writeFile({
+					filePath,
+					data: wbout.buffer,
+					encoding: 'binary',
+					success: () => {
+						uni.hideLoading();
+						wx.openDocument({
+							filePath,
+							fileType: 'xlsx',
+							showMenu: true,
+							success: () => uni.showToast({ title: '导出成功', icon: 'success' }),
+							fail: (err) => {
+								console.error('[export] open fail:', err);
+								uni.showToast({ title: '打开文件失败', icon: 'none' });
+							}
+						});
+					},
+					fail: (err) => {
+						console.error('[export] write fail:', err);
+						uni.hideLoading();
+						uni.showToast({ title: '导出失败', icon: 'none' });
+					}
+				});
+			} catch (err) {
+				console.error('[export] exception:', err);
+				uni.hideLoading();
+				uni.showToast({ title: '导出失败', icon: 'none' });
+			}
+			// #endif
+
+			// #ifdef APP-PLUS
+			uni.showLoading({ title: '导出中...' });
+			try {
+				var BOM = String.fromCharCode(0xFEFF);
+				var headers2 = ['序号', '商品名称', '条码', '进价', '售价', '利润', '有图片', '备注', '创建时间'];
+				var csvRows = [headers2];
+				for (var r = 0; r < this.goodsList.length; r++) {
+					var item = this.goodsList[r];
+					csvRows.push([
+						String(r + 1),
+						item.name || '',
+						String.fromCharCode(9) + (item.barcode || ''),
+						parseFloat(item.purchase_price || 0).toFixed(2),
+						parseFloat(item.selling_price || 0).toFixed(2),
+						(parseFloat(item.selling_price || 0) - parseFloat(item.purchase_price || 0)).toFixed(2),
+						item.image_url ? '是' : '否',
+						item.remark || '',
+						item.createdAt || ''
+					]);
+				}
+				var csvLines = [];
+				for (var r2 = 0; r2 < csvRows.length; r2++) {
+					var row = csvRows[r2];
+					var cells = [];
+					for (var c = 0; c < row.length; c++) {
+						cells.push('"' + String(row[c]).replace(/"/g, '""') + '"');
+					}
+					csvLines.push(cells.join(','));
+				}
+				var csvContent = BOM + csvLines.join(String.fromCharCode(10));
+				var fileName = '商品数据.csv';
+				var main = plus.android.runtimeMainActivity();
+				var dir = plus.android.invoke(main, 'getFilesDir');
+				var file = plus.android.newObject('java.io.File', dir, fileName);
+				var fos = plus.android.newObject('java.io.FileOutputStream', file);
+				var osw = plus.android.newObject('java.io.OutputStreamWriter', fos, 'UTF-8');
+				plus.android.invoke(osw, 'write', csvContent);
+				plus.android.invoke(osw, 'close');
+				var filePath = plus.android.invoke(file, 'getAbsolutePath');
+				uni.hideLoading();
+				plus.runtime.openFile(filePath, {}, function() {
+					uni.showToast({ title: '导出成功', icon: 'success' });
+				}, function() {
+					uni.showToast({ title: '已保存到应用目录', icon: 'success' });
+				});
+			} catch (err) {
+				console.error('[export] exception:', err);
+				uni.hideLoading();
+				uni.showToast({ title: '导出失败', icon: 'none' });
+			}
+			// #endif
+		},
+
 		// 打开编辑弹窗
 		openEditForm(goods) {
 			this.editFormData = {
