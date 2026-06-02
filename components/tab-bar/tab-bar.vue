@@ -17,7 +17,7 @@
 				<uni-icons
 					:type="currentIndex === index ? tab.filledIcon : tab.icon"
 					:size="24"
-					:color="currentIndex === index ? '#4F46E5' : '#9CA3AF'"
+					:color="currentIndex === index ? '#00A8B5' : '#9CA3AF'"
 				></uni-icons>
 				<text
 					class="tab-label"
@@ -103,7 +103,7 @@ export default {
 }
 
 .label-active {
-	color: #4F46E5;
+	color: #00A8B5;
 	font-weight: 600;
 }
 
@@ -115,13 +115,13 @@ export default {
 .fab-btn {
 	width: 104rpx;
 	height: 104rpx;
-	background: linear-gradient(135deg, #4F46E5, #6366F1);
+	background: linear-gradient(135deg, #00A8B5, #007BFF);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	margin-top: -56rpx;
-	box-shadow: 0 12rpx 32rpx rgba(79, 70, 229, 0.3);
+	box-shadow: 0 12rpx 32rpx rgba(0, 168, 181, 0.28);
 
 	&:active {
 		transform: scale(0.92);
