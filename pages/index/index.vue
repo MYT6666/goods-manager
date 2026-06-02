@@ -246,8 +246,33 @@ export default {
 		},
 
 		async handleSearch() {
-			if (!this.searchKeyword.trim()) return;
-			await this.queryByBarcode(this.searchKeyword.trim());
+			const keyword = this.searchKeyword.trim();
+			if (!keyword) return;
+			try {
+				const app = getApp().globalData.cloudbase;
+				const userInfo = uni.getStorageSync('userInfo');
+				if (!userInfo || !userInfo.shop_id) {
+					uni.showToast({ title: '用户信息不完整', icon: 'none' });
+					return;
+				}
+				const res = await app.callFunction({
+					name: 'mysql-api',
+					data: {
+						action: 'search',
+						keyword: keyword,
+						shopId: userInfo.shop_id,
+						role: userInfo.role
+					}
+				});
+				if (res.result.code === 0 && res.result.data && res.result.data.length > 0) {
+					this.scannedGoods = res.result.data[0];
+				} else {
+					uni.showToast({ title: '未找到相关商品', icon: 'none' });
+				}
+			} catch (err) {
+				console.error('搜索失败:', err);
+				uni.showToast({ title: '搜索失败', icon: 'none' });
+			}
 		},
 
 		clearSearch() {
