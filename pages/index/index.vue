@@ -1,22 +1,25 @@
 <template>
 	<view class="page">
+		<!-- ===== 顶部柔和渐变背景 ===== -->
+		<view class="top-gradient"></view>
+
 		<!-- ===== 状态栏占位 ===== -->
 		<view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
 
-		<!-- ===== 欢迎卡片（毛玻璃） ===== -->
-		<view class="welcome-card">
-			<view class="welcome-left">
-				<view class="avatar">
-					<text class="avatar-text">{{ avatarChar }}</text>
-				</view>
-				<view class="welcome-info">
-					<text class="greeting">{{ greetingText }}</text>
-					<text class="welcome-name">{{ userInfo.username || 'boss1' }}，{{ timePeriod }}好</text>
-				</view>
+		<!-- ===== 欢迎区 ===== -->
+		<view class="welcome-section">
+			<view class="avatar">
+				<text class="avatar-text">{{ avatarChar }}</text>
 			</view>
-			<view class="shop-capsule" v-if="userInfo && userInfo.shop_id">
-				<uni-icons type="location-filled" size="14" color="#4F46E5"></uni-icons>
-				<text class="shop-name">{{ shopName || 'YT厂库' }}</text>
+			<view class="welcome-body">
+				<view class="welcome-top-row">
+					<text class="greeting">{{ greetingText }}</text>
+					<view class="shop-capsule" v-if="userInfo && userInfo.shop_id">
+						<view class="capsule-dot"></view>
+						<text class="shop-name">{{ shopName || 'YT厂库' }}</text>
+					</view>
+				</view>
+				<text class="welcome-name">{{ userInfo.username || 'boss1' }}，{{ timePeriod }}好</text>
 			</view>
 		</view>
 
@@ -38,30 +41,30 @@
 			</view>
 		</view>
 
-		<!-- ===== 功能卡片区（金刚区） ===== -->
+		<!-- ===== 功能卡片区 ===== -->
 		<view class="feature-grid">
-			<!-- 扫码查价 -->
+			<!-- 扫码查价 · 淡蓝 -->
 			<view class="feature-card card-scan" @click="scanCode">
-				<view class="feature-icon-wrap icon-scan-bg">
-					<uni-icons type="scan" size="32" color="#4F46E5"></uni-icons>
+				<view class="feature-icon-wrap">
+					<uni-icons type="scan" size="34" color="#4F46E5"></uni-icons>
 				</view>
 				<text class="feature-label">扫码查价</text>
 				<text class="feature-desc">扫描条码查价格</text>
 			</view>
 
-			<!-- 扫码结账 -->
+			<!-- 扫码结账 · 淡红 -->
 			<view class="feature-card card-checkout" @click="goCheckout">
-				<view class="feature-icon-wrap icon-checkout-bg">
-					<uni-icons type="cart" size="32" color="#EF4444"></uni-icons>
+				<view class="feature-icon-wrap">
+					<uni-icons type="cart" size="34" color="#EF4444"></uni-icons>
 				</view>
 				<text class="feature-label">扫码结账</text>
 				<text class="feature-desc">快速结算订单</text>
 			</view>
 
-			<!-- 新增商品 -->
+			<!-- 新增商品 · 淡绿 -->
 			<view class="feature-card card-add" @click="goAdd">
-				<view class="feature-icon-wrap icon-add-bg">
-					<uni-icons type="plusempty" size="32" color="#10B981"></uni-icons>
+				<view class="feature-icon-wrap">
+					<uni-icons type="plusempty" size="34" color="#10B981"></uni-icons>
 				</view>
 				<text class="feature-label">新增商品</text>
 				<text class="feature-desc">录入新商品</text>
@@ -272,125 +275,170 @@ export default {
 </script>
 
 <style lang="scss">
-/* ===== 全局变量（uni.scss 自动注入） ===== */
+/* ============================================================
+   1. 页面基底
+   ============================================================ */
 .page {
 	min-height: 100vh;
-	background: $app-bg;
+	background: #FAFAFA;
 	padding: 0 $spacing-md;
 	padding-bottom: 180rpx;
+	position: relative;
 }
 
-/* ===== 状态栏 ===== */
+/* 顶部柔和渐变（淡蓝 → 白 → 透明） */
+.top-gradient {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 360rpx;
+	background: linear-gradient(180deg,
+		rgba(79, 70, 229, 0.04) 0%,
+		rgba(99, 102, 241, 0.02) 30%,
+		rgba(255, 255, 255, 0) 100%
+	);
+	pointer-events: none;
+	z-index: 0;
+}
+
 .status-bar {
 	width: 100%;
+	position: relative;
+	z-index: 1;
 }
 
-/* ===== 欢迎卡片 ===== */
-.welcome-card {
-	@include card-base;
-	@include flex-between;
-	background: linear-gradient(135deg, rgba(79, 70, 229, 0.06), rgba(99, 102, 241, 0.02));
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
-	border: 1px solid rgba(79, 70, 229, 0.08);
-	padding: $spacing-lg;
-	margin-top: $spacing-sm;
-}
-
-.welcome-left {
+/* ============================================================
+   2. 欢迎区
+   ============================================================ */
+.welcome-section {
+	position: relative;
+	z-index: 1;
 	display: flex;
 	align-items: center;
 	gap: 20rpx;
+	padding: $spacing-sm 0 $spacing-md;
 }
 
 .avatar {
-	width: 80rpx;
-	height: 80rpx;
+	width: 88rpx;
+	height: 88rpx;
 	border-radius: 50%;
-	background: linear-gradient(135deg, $app-primary, $app-primary-light);
-	@include flex-center;
+	background: linear-gradient(135deg, #4F46E5, #818CF8);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	flex-shrink: 0;
+	box-shadow: 0 4rpx 16rpx rgba(79, 70, 229, 0.18);
 }
 
 .avatar-text {
-	font-size: 32rpx;
-	font-weight: $font-weight-bold;
-	color: $app-text-inverse;
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #FFFFFF;
 }
 
-.welcome-info {
+.welcome-body {
 	display: flex;
 	flex-direction: column;
-	gap: 4rpx;
+	gap: 6rpx;
+}
+
+/* 问好行：问候语 + 门店胶囊 */
+.welcome-top-row {
+	display: flex;
+	align-items: center;
+	gap: 16rpx;
 }
 
 .greeting {
-	font-size: $font-size-sm;
-	color: $app-text-secondary;
+	font-size: 26rpx;
+	color: #6B7280;
 }
 
-.welcome-name {
-	font-size: $font-size-lg;
-	font-weight: $font-weight-bold;
-	color: $app-text-primary;
-}
-
-/* 门店胶囊 */
+/* 门店胶囊：半透明 + 微弱灰边框 */
 .shop-capsule {
 	display: flex;
 	align-items: center;
-	gap: 6rpx;
-	background: $app-primary-bg;
-	border-radius: 40rpx;
-	padding: 12rpx 22rpx;
-	flex-shrink: 0;
+	gap: 8rpx;
+	background: rgba(255, 255, 255, 0.7);
+	border: 1px solid rgba(0, 0, 0, 0.06);
+	border-radius: 32rpx;
+	padding: 6rpx 18rpx;
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+
+.capsule-dot {
+	width: 10rpx;
+	height: 10rpx;
+	border-radius: 50%;
+	background: #4F46E5;
 }
 
 .shop-name {
-	font-size: $font-size-sm;
-	color: $app-primary;
-	font-weight: $font-weight-medium;
+	font-size: 22rpx;
+	color: #4F46E5;
+	font-weight: 500;
 }
 
-/* ===== 搜索栏 ===== */
+/* 用户名：加粗放大 */
+.welcome-name {
+	font-size: 40rpx;
+	font-weight: 700;
+	color: #1F2937;
+	line-height: 1.3;
+}
+
+/* ============================================================
+   3. 搜索栏 — 两端完全大圆角
+   ============================================================ */
 .search-section {
-	margin-top: $spacing-lg;
+	margin-top: $spacing-md;
+	position: relative;
+	z-index: 1;
 }
 
 .search-box {
 	display: flex;
 	align-items: center;
-	background: $app-bg-card;
-	border-radius: 60rpx;
-	padding: 0 32rpx;
-	height: 88rpx;
-	box-shadow: $card-shadow-light;
+	background: #FFFFFF;
+	border-radius: 50px;
+	padding: 0 36rpx;
+	height: 92rpx;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 	gap: 16rpx;
 }
 
 .search-input {
 	flex: 1;
-	height: 88rpx;
-	font-size: $font-size-base;
-	color: $app-text-primary;
+	height: 92rpx;
+	font-size: 28rpx;
+	color: #1F2937;
 }
 
 .search-clear {
-	@include flex-center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	flex-shrink: 0;
 }
 
-/* ===== 功能卡片区 ===== */
+/* ============================================================
+   4. 功能卡片区 — 马卡龙淡色背景
+   ============================================================ */
 .feature-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: $spacing-sm;
+	gap: 16rpx;
 	margin-top: $spacing-lg;
+	position: relative;
+	z-index: 1;
 }
 
 .feature-card {
-	@include card-base;
-	padding: 36rpx 20rpx 28rpx;
+	border-radius: 16px;
+	padding: 36rpx 16rpx 28rpx;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -402,66 +450,80 @@ export default {
 	}
 }
 
+/* 扫码查价 — 淡蓝 */
+.card-scan {
+	background: rgba(79, 70, 229, 0.06);
+}
+
+/* 扫码结账 — 淡红 */
+.card-checkout {
+	background: rgba(239, 68, 68, 0.06);
+}
+
+/* 新增商品 — 淡绿 */
+.card-add {
+	background: rgba(16, 185, 129, 0.06);
+}
+
 .feature-icon-wrap {
 	width: 96rpx;
 	height: 96rpx;
 	border-radius: 28rpx;
-	@include flex-center;
-}
-
-.icon-scan-bg {
-	background: rgba(79, 70, 229, 0.08);
-}
-
-.icon-checkout-bg {
-	background: rgba(239, 68, 68, 0.08);
-}
-
-.icon-add-bg {
-	background: rgba(16, 185, 129, 0.08);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.7);
 }
 
 .feature-label {
-	font-size: $font-size-base;
-	font-weight: $font-weight-bold;
-	color: $app-text-primary;
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
 .feature-desc {
-	font-size: $font-size-xs;
-	color: $app-text-tertiary;
+	font-size: 22rpx;
+	color: #9CA3AF;
 }
 
-/* ===== 结果卡片 ===== */
+/* ============================================================
+   5. 扫码结果卡片
+   ============================================================ */
 .result-section {
 	margin-top: $spacing-lg;
+	position: relative;
+	z-index: 1;
 }
 
 .result-card {
-	@include card-base;
+	background: #FFFFFF;
+	border-radius: 20px;
 	padding: $spacing-lg;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .result-header {
-	@include flex-between;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 	margin-bottom: $spacing-md;
 }
 
 .result-name {
-	font-size: $font-size-lg;
-	font-weight: $font-weight-bold;
-	color: $app-text-primary;
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
 .result-badge {
-	background: $app-primary-bg;
+	background: rgba(79, 70, 229, 0.08);
 	border-radius: 12rpx;
 	padding: 6rpx 16rpx;
 
 	text {
-		font-size: $font-size-xs;
-		color: $app-primary;
-		font-weight: $font-weight-medium;
+		font-size: 22rpx;
+		color: #4F46E5;
+		font-weight: 500;
 	}
 }
 
@@ -469,8 +531,8 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
-	background: $app-bg;
-	border-radius: $card-radius-sm;
+	background: #FAFAFA;
+	border-radius: 14px;
 	padding: 24rpx 20rpx;
 	margin-bottom: $spacing-sm;
 }
@@ -481,30 +543,30 @@ export default {
 
 .price-label {
 	display: block;
-	font-size: $font-size-xs;
-	color: $app-text-secondary;
+	font-size: 22rpx;
+	color: #9CA3AF;
 	margin-bottom: 6rpx;
 }
 
 .price-value {
 	display: block;
-	font-size: $font-size-md;
-	font-weight: $font-weight-bold;
-	color: $app-text-primary;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
 .price-selling {
-	color: $app-accent;
+	color: #10B981;
 }
 
 .price-profit {
-	color: $app-danger;
+	color: #EF4444;
 }
 
 .price-divider {
 	width: 2rpx;
 	height: 48rpx;
-	background: $app-border;
+	background: #E5E7EB;
 }
 
 .result-barcode {
@@ -514,42 +576,48 @@ export default {
 }
 
 .barcode-label {
-	font-size: $font-size-sm;
-	color: $app-text-secondary;
+	font-size: 24rpx;
+	color: #6B7280;
 }
 
 .barcode-value {
-	font-size: $font-size-sm;
-	color: $app-text-primary;
+	font-size: 24rpx;
+	color: #1F2937;
 	font-family: monospace;
 }
 
-/* ===== 空状态 ===== */
+/* ============================================================
+   6. 空状态
+   ============================================================ */
 .empty-state {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	padding: 100rpx 40rpx;
+	position: relative;
+	z-index: 1;
 }
 
 .empty-icon-circle {
 	width: 140rpx;
 	height: 140rpx;
 	border-radius: 50%;
-	background: $app-primary-bg;
-	@include flex-center;
+	background: rgba(79, 70, 229, 0.06);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	margin-bottom: $spacing-lg;
 }
 
 .empty-title {
-	font-size: $font-size-md;
-	font-weight: $font-weight-bold;
-	color: $app-text-primary;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1F2937;
 	margin-bottom: $spacing-xs;
 }
 
 .empty-sub {
-	font-size: $font-size-sm;
-	color: $app-text-tertiary;
+	font-size: 24rpx;
+	color: #9CA3AF;
 }
 </style>
