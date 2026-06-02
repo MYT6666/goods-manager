@@ -22,7 +22,7 @@
 					<input type="password" v-model="password" placeholder="请输入密码" class="input" />
 				</view>
 
-				<button class="login-btn" @click="login" :loading="loading">
+				<button class="main-btn" @click="login" :loading="loading">
 					{{ loading ? '登录中...' : '登录' }}
 				</button>
 
@@ -51,11 +51,11 @@
 				<view class="form-item" v-if="roles && roles.length > 0">
 					<text class="label">角色</text>
 					<view class="role-buttons">
-						<button 
-							v-for="(role, index) in roles" 
+						<button
+							v-for="(role, index) in roles"
 							:key="role.value || index"
-							class="role-btn" 
-							:class="{ active: roleIndex === index }" 
+							class="role-btn"
+							:class="{ active: roleIndex === index }"
 							@click="selectRole(index)"
 							type="default"
 						>
@@ -64,14 +64,13 @@
 					</view>
 				</view>
 
-				<!-- 邀请码输入框，当角色为经理或店员时显示 -->
 				<view class="form-item"
 					v-if="selectedRole && (selectedRole.value === 'manager' || selectedRole.value === 'staff')">
 					<text class="label">邀请码</text>
 					<input type="text" v-model="inviteCode" placeholder="请输入邀请码" class="input" />
 				</view>
 
-				<button class="login-btn" @click="register" :loading="loading">
+				<button class="main-btn" @click="register" :loading="loading">
 					{{ loading ? '注册中...' : '注册' }}
 				</button>
 
@@ -94,18 +93,10 @@
 				roleIndex: 0,
 				inviteCode: '',
 				loading: false,
-				roles: [{
-						label: '店长',
-						value: 'store_manager'
-					},
-					{
-						label: '经理',
-						value: 'manager'
-					},
-					{
-						label: '店员',
-						value: 'staff'
-					}
+				roles: [
+					{ label: '店长', value: 'store_manager' },
+					{ label: '经理', value: 'manager' },
+					{ label: '店员', value: 'staff' }
 				]
 			};
 		},
@@ -143,10 +134,10 @@
 				}
 
 				this.loading = true;
-			
+
 				try {
 					uni.removeStorageSync('userInfo');
-					
+
 					const app = getApp().globalData.cloudbase;
 					const res = await app.callFunction({
 						name: 'user-auth',
@@ -201,7 +192,7 @@
 
 				try {
 					const app = getApp().globalData.cloudbase;
-					
+
 					let loginState = await app.auth().getLoginState();
 					if (!loginState) {
 						await app.auth({ persistence: 'local' }).anonymousAuthProvider().signIn();
@@ -249,27 +240,34 @@
 	};
 </script>
 
-<style>
+<style lang="scss">
+/* ============================================================
+   1. 页面容器
+   ============================================================ */
 .login-container {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	min-height: 100vh;
-	background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+	background: linear-gradient(180deg, #F0F9FA 0%, #FFFFFF 100%);
 	padding: 40rpx;
+	box-sizing: border-box;
 }
 
 .login-box {
 	width: 100%;
 	max-width: 600rpx;
-	background-color: white;
+	background: #FFFFFF;
 	border-radius: 24rpx;
 	padding: 50rpx 40rpx;
-	box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.1);
+	box-shadow: 0 8rpx 36rpx rgba(0, 0, 0, 0.06);
+	box-sizing: border-box;
 }
 
-/* Logo 区域 */
+/* ============================================================
+   2. Logo 区域
+   ============================================================ */
 .logo-section {
 	display: flex;
 	flex-direction: column;
@@ -278,102 +276,132 @@
 }
 
 .logo-circle {
-	width: 160rpx;
-	height: 160rpx;
+	width: 150rpx;
+	height: 150rpx;
 	border-radius: 50%;
 	overflow: hidden;
-	margin-bottom: 25rpx;
-	box-shadow: 0 8rpx 30rpx rgba(102, 126, 234, 0.3);
-	border: 4rpx solid rgba(102, 126, 234, 0.2);
+	margin-bottom: 24rpx;
+	box-shadow: 0 8rpx 28rpx rgba(0, 168, 181, 0.2);
 }
 
 .login-logo {
-	width: 160rpx;
-	height: 160rpx;
+	width: 150rpx;
+	height: 150rpx;
 }
 
 .login-title {
-	font-size: 42rpx;
-	font-weight: bold;
+	font-size: 40rpx;
+	font-weight: 700;
 	text-align: center;
-	color: #333;
-	margin-bottom: 10rpx;
+	color: #1F2937;
+	margin-bottom: 8rpx;
 }
 
 .login-subtitle {
 	font-size: 26rpx;
-	color: #999;
+	color: #9CA3AF;
 	text-align: center;
 }
 
+/* ============================================================
+   3. 表单
+   ============================================================ */
 .form-item {
-	margin-bottom: 30rpx;
+	margin-bottom: 28rpx;
+	box-sizing: border-box;
 }
 
 .label {
 	display: block;
-	font-size: 28rpx;
-	color: #333;
-	margin-bottom: 12rpx;
+	font-size: 26rpx;
+	color: #374151;
+	margin-bottom: 10rpx;
 	font-weight: 500;
 }
 
+/* 输入框 —— box-sizing 防溢出 */
 .input {
 	width: 100%;
-	height: 90rpx;
-	background: #f5f5f5;
-	border-radius: 12rpx;
-	padding: 0 25rpx;
-	font-size: 30rpx;
-	border: 2rpx solid transparent;
-	transition: border-color 0.2s;
+	height: 88rpx;
+	background: #F9FAFB;
+	border-radius: 12px;
+	padding: 0 24rpx;
+	font-size: 28rpx;
+	color: #1F2937;
+	border: 1px solid #E5E7EB;
+	box-sizing: border-box;
+	transition: border-color 0.2s, box-shadow 0.2s;
+
+	&:focus {
+		border-color: #00A8B5;
+		box-shadow: 0 0 0 3rpx rgba(0, 168, 181, 0.08);
+	}
 }
 
-.input:focus {
-	border-color: #667eea;
-}
-
-.login-btn {
+/* ============================================================
+   4. 主按钮 —— 科技蓝绿渐变
+   ============================================================ */
+.main-btn {
 	width: 100%;
 	height: 90rpx;
 	line-height: 90rpx;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: white;
+	background: linear-gradient(135deg, #00A8B5 0%, #007BFF 100%);
+	color: #FFFFFF;
 	font-size: 32rpx;
-	font-weight: 500;
-	border-radius: 16rpx;
+	font-weight: 600;
+	border-radius: 14rpx;
 	margin-top: 20rpx;
-	box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
+	border: none;
+	box-shadow: 0 6rpx 24rpx rgba(0, 168, 181, 0.28);
+	box-sizing: border-box;
+
+	&:active {
+		opacity: 0.85;
+	}
 }
 
+/* ============================================================
+   5. 底部链接
+   ============================================================ */
 .switch-mode {
 	text-align: center;
-	margin-top: 30rpx;
+	margin-top: 28rpx;
+
+	text {
+		color: #00A8B5;
+		font-size: 26rpx;
+		font-weight: 500;
+
+		&:active {
+			opacity: 0.6;
+		}
+	}
 }
 
-.switch-mode text {
-	color: #667eea;
-	font-size: 26rpx;
-}
-
+/* ============================================================
+   6. 角色选择
+   ============================================================ */
 .role-buttons {
 	display: flex;
-	gap: 15rpx;
+	gap: 14rpx;
 }
 
 .role-btn {
 	flex: 1;
-	height: 80rpx;
-	background-color: #f5f5f5;
-	color: #333;
-	font-size: 28rpx;
+	height: 76rpx;
+	background: #F3F4F6;
+	color: #6B7280;
+	font-size: 26rpx;
 	border-radius: 12rpx;
-	border: 2rpx solid transparent;
+	border: 1px solid transparent;
+	box-sizing: border-box;
+	transition: all 0.2s;
 }
 
 .role-btn.active {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: white;
-	border-color: transparent;
+	background: rgba(0, 168, 181, 0.08);
+	color: #007BFF;
+	border-color: rgba(0, 168, 181, 0.2);
+	font-weight: 600;
 }
 </style>
