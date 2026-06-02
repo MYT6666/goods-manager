@@ -172,62 +172,74 @@
 		</view>
 
 		<!-- ==================== 详情弹窗 ==================== -->
-		<view class="popup" v-if="showDetailPopup">
-			<view class="popup-mask" @click="closeDetailPopup"></view>
-			<view class="popup-content detail-popup-content">
-				<view class="popup-header">
-					<text class="popup-title">商品详情</text>
-					<view class="popup-close" @click="closeDetailPopup">
-						<uni-icons type="closeempty" size="18" color="#999"></uni-icons>
+			<view class="popup" v-if="showDetailPopup">
+				<view class="popup-mask" @click="closeDetailPopup"></view>
+				<view class="popup-content detail-popup-content">
+					<!-- 阻尼把手 -->
+					<view class="drag-indicator"></view>
+
+					<view class="popup-header">
+						<text class="popup-title">商品详情</text>
+						<view class="popup-close" @click="closeDetailPopup">
+							<uni-icons type="closeempty" size="18" color="#999"></uni-icons>
+						</view>
 					</view>
-				</view>
 
-				<view class="detail-image-area">
-					<image v-if="detailGoods.image_url" :src="detailGoods.image_url" mode="aspectFit" class="detail-main-image"></image>
-					<view v-else class="detail-avatar-large" :style="{ background: getAvatarColor(detailGoods.name || '') }">
-						<text class="detail-avatar-letter">{{ (detailGoods.name || '').charAt(0) }}</text>
+					<view class="detail-image-area">
+						<image v-if="detailGoods.image_url" :src="detailGoods.image_url" mode="aspectFit" class="detail-main-image"></image>
+						<view v-else class="detail-avatar-large" :style="{ background: getAvatarColor(detailGoods.name || '') }">
+							<text class="detail-avatar-letter">{{ (detailGoods.name || '').charAt(0) }}</text>
+						</view>
 					</view>
-				</view>
 
-				<text class="detail-goods-name">{{ detailGoods.name }}</text>
+					<text class="detail-goods-name">{{ detailGoods.name }}</text>
 
-				<view class="detail-price-row">
-					<view class="detail-price-item">
-						<text class="detail-price-label">进价</text>
-						<text class="detail-price-value">¥{{ formatPrice(detailGoods.purchase_price) }}</text>
+					<view class="detail-price-row">
+						<view class="detail-price-item">
+							<text class="detail-price-label">进价</text>
+							<text class="detail-price-value">¥{{ formatPrice(detailGoods.purchase_price) }}</text>
+						</view>
+						<view class="detail-price-item">
+							<text class="detail-price-label">售价</text>
+							<text class="detail-price-value detail-selling">¥{{ formatPrice(detailGoods.selling_price) }}</text>
+						</view>
+						<view class="detail-price-item">
+							<text class="detail-price-label">利润</text>
+							<text class="detail-price-value detail-profit">¥{{ calculateProfit(detailGoods) }}</text>
+						</view>
 					</view>
-					<view class="detail-price-item">
-						<text class="detail-price-label">售价</text>
-						<text class="detail-price-value detail-selling">¥{{ formatPrice(detailGoods.selling_price) }}</text>
+
+					<view class="detail-info-row" v-if="detailGoods.image_url">
+						<text class="detail-info-label">商品图片</text>
+						<text class="detail-info-value has-image">已上传</text>
 					</view>
-					<view class="detail-price-item">
-						<text class="detail-price-label">利润</text>
-						<text class="detail-price-value detail-profit">¥{{ calculateProfit(detailGoods) }}</text>
+
+					<view class="detail-info-row">
+						<text class="detail-info-label">条码</text>
+						<view class="detail-info-right">
+							<text class="detail-info-value barcode-font">{{ detailGoods.barcode }}</text>
+							<view class="copy-icon" @click="copyBarcode(detailGoods.barcode)">
+								<uni-icons type="copy" size="16" color="#9CA3AF"></uni-icons>
+							</view>
+						</view>
 					</view>
-				</view>
 
-				<view class="detail-info-row" v-if="detailGoods.image_url">
-					<text class="detail-info-label">商品图片</text>
-					<text class="detail-info-value has-image">已上传</text>
-				</view>
+					<view class="detail-info-row" v-if="detailGoods.remark">
+						<text class="detail-info-label">备注</text>
+						<text class="detail-info-value">{{ detailGoods.remark }}</text>
+					</view>
 
-				<view class="detail-info-row">
-					<text class="detail-info-label">条码</text>
-					<text class="detail-info-value barcode-font">{{ detailGoods.barcode }}</text>
-				</view>
-
-				<view class="detail-info-row" v-if="detailGoods.remark">
-					<text class="detail-info-label">备注</text>
-					<text class="detail-info-value">{{ detailGoods.remark }}</text>
-				</view>
-
-				<view class="detail-close-area">
-					<button class="detail-close-btn" @click="closeDetailPopup">关闭</button>
+					<!-- 底部编辑按钮 -->
+					<view class="detail-bottom-bar">
+						<view class="detail-edit-btn" @click="onDetailEdit">
+							<text>编辑商品</text>
+							<uni-icons type="arrowright" size="18" color="#FFFFFF"></uni-icons>
+						</view>
+					</view>
 				</view>
 			</view>
-		</view>
 
-		<!-- ===== 底部导航 ===== -->
+			<!-- ===== 底部导航 ===== -->
 		<tab-bar :currentIndex="1"></tab-bar>
 	</view>
 </template>
@@ -370,6 +382,18 @@ export default {
 		openGoodsDetail(goods) {
 			this.detailGoods = { ...goods };
 			this.showDetailPopup = true;
+		},
+		copyBarcode(barcode) {
+			if (!barcode) return;
+			uni.setClipboardData({
+				data: barcode,
+				success: () => uni.showToast({ title: '条码已复制', icon: 'success' })
+			});
+		},
+		onDetailEdit() {
+			const goods = this.detailGoods;
+			this.closeDetailPopup();
+			this.$nextTick(() => this.openEditForm(goods));
 		},
 		closeDetailPopup() {
 			this.showDetailPopup = false;
@@ -1304,6 +1328,16 @@ export default {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	padding-top: 0;
+}
+
+/* 阻尼把手 */
+.drag-indicator {
+	width: 48rpx;
+	height: 8rpx;
+	background: #E5E7EB;
+	border-radius: 4rpx;
+	margin: 16rpx auto 20rpx;
 }
 
 .detail-image-area {
@@ -1313,19 +1347,21 @@ export default {
 }
 
 .detail-main-image {
-	width: 360rpx;
-	height: 360rpx;
-	border-radius: 20rpx;
+	width: 340rpx;
+	height: 340rpx;
+	border-radius: 12px;
 	background: #F9FAFB;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .detail-avatar-large {
 	width: 150rpx;
 	height: 150rpx;
-	border-radius: 50%;
+	border-radius: 12px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .detail-avatar-letter {
@@ -1400,7 +1436,6 @@ export default {
 .detail-info-value {
 	font-size: 26rpx;
 	color: #1F2937;
-	flex: 1;
 	text-align: right;
 }
 
@@ -1409,26 +1444,57 @@ export default {
 	font-weight: 500;
 }
 
+/* 条码行右侧 */
+.detail-info-right {
+	display: flex;
+	align-items: center;
+	gap: 12rpx;
+}
+
+.copy-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44rpx;
+	height: 44rpx;
+	border-radius: 50%;
+
+	&:active {
+		background: #F3F4F6;
+	}
+}
+
 .barcode-font {
 	font-family: monospace;
 }
 
-.detail-close-area {
+/* 底部编辑按钮 */
+.detail-bottom-bar {
 	width: 100%;
 	margin-top: 36rpx;
+	padding-bottom: env(safe-area-inset-bottom);
 }
 
-.detail-close-btn {
+.detail-edit-btn {
 	width: 100%;
-	height: 88rpx;
-	line-height: 88rpx;
-	font-size: 30rpx;
-	font-weight: 500;
-	border-radius: 16rpx;
-	background: #F3F4F6;
-	color: #6B7280;
-	padding: 0;
-	margin: 0;
-	border: none;
+	height: 96rpx;
+	background: linear-gradient(135deg, #4F46E5, #6366F1);
+	border-radius: 48rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12rpx;
+	box-shadow: 0 8rpx 28rpx rgba(79, 70, 229, 0.25);
+
+	text {
+		font-size: 30rpx;
+		font-weight: 700;
+		color: #FFFFFF;
+	}
+
+	&:active {
+		opacity: 0.85;
+		transform: scale(0.98);
+	}
 }
 </style>
