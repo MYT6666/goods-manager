@@ -1,135 +1,144 @@
 <template>
-	<view class="content">
-		<!-- 用户信息卡片 -->
+	<view class="page">
+		<!-- ===== 状态栏 + 顶部柔和渐变 ===== -->
+		<view class="top-gradient"></view>
 		<view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
-		<view class="user-card">
+
+		<!-- ===== 用户信息区 ===== -->
+		<view class="user-section">
 			<view class="user-avatar">
-				<text class="avatar-text">{{ (userInfo && userInfo.username && userInfo.username.charAt(0) && userInfo.username.charAt(0).toUpperCase()) || '?' }}</text>
+				<text class="avatar-text">{{ (userInfo && userInfo.username && userInfo.username.charAt(0).toUpperCase()) || '?' }}</text>
 			</view>
-			<view class="user-info">
+			<view class="user-body">
 				<text class="username">{{ (userInfo && userInfo.username) || '未登录' }}</text>
-				<text class="role-badge" :class="userInfo && userInfo.role">{{ roleText }}</text>
+				<view class="role-capsule" :class="userInfo && userInfo.role">
+					<text class="role-text">{{ roleText }}</text>
+				</view>
 			</view>
 		</view>
 
-		<!-- 店铺信息卡片 -->
-		<view class="shop-card" v-if="userInfo && userInfo.shop_id">
-			<view class="card-header">
-				<view class="card-title-row">
-					<uni-icons type="shop" size="20" color="#667eea"></uni-icons>
-					<text class="card-title">店铺信息</text>
+		<!-- ===== 店铺信息 ===== -->
+		<view class="info-card" v-if="userInfo && userInfo.shop_id">
+			<view class="card-head">
+				<view class="card-head-left">
+					<uni-icons type="shop" size="18" color="#4F46E5"></uni-icons>
+					<text class="card-head-title">店铺信息</text>
 				</view>
 			</view>
-			<view class="shop-info-list">
-				<view class="info-item">
+			<view class="info-list">
+				<view class="info-row">
 					<text class="info-label">店铺名称</text>
 					<view class="info-value-row">
 						<text class="info-value">{{ shopInfo.shop_name || '未设置' }}</text>
-						<button v-if="userInfo && userInfo.role === 'store_manager'" class="edit-btn" @click="editShopName">修改</button>
+						<text
+							v-if="userInfo && userInfo.role === 'store_manager'"
+							class="action-link edit-link"
+							@click="editShopName"
+						>修改</text>
 					</view>
 				</view>
-				<view class="info-item">
+				<view class="info-row">
 					<text class="info-label">店铺ID</text>
-					<text class="info-value id">{{ userInfo.shop_id }}</text>
+					<text class="info-value mono">{{ userInfo.shop_id }}</text>
 				</view>
 			</view>
 		</view>
 
-		<!-- 邀请码管理（仅店长） -->
-		<view class="section-card" v-if="userInfo && userInfo.role === 'store_manager'">
-			<view class="card-header">
-				<view class="card-title-row">
-					<uni-icons type="locked" size="20" color="#667eea"></uni-icons>
-					<text class="card-title">邀请码管理</text>
+		<!-- ===== 邀请码管理 ===== -->
+		<view class="info-card" v-if="userInfo && userInfo.role === 'store_manager'">
+			<view class="card-head">
+				<view class="card-head-left">
+					<uni-icons type="locked" size="18" color="#4F46E5"></uni-icons>
+					<text class="card-head-title">邀请码管理</text>
 				</view>
-				<text class="card-subtitle">多人共用，无限使用</text>
+				<text class="card-head-sub">多人共用，无限使用</text>
 			</view>
-			<view class="codes-list">
-				<view class="code-item">
+			<view class="code-list">
+				<view class="code-row">
 					<view class="code-info">
 						<text class="code-role">经理邀请码</text>
-						<text class="code-value">{{ inviteCodes.managerCode || '---' }}</text>
+						<text class="code-val">{{ inviteCodes.managerCode || '---' }}</text>
 					</view>
-					<button class="copy-btn" @click="copyCode(inviteCodes.managerCode)">复制</button>
+					<text class="action-link" @click="copyCode(inviteCodes.managerCode)">复制</text>
 				</view>
-				<view class="code-item">
+				<view class="code-row">
 					<view class="code-info">
 						<text class="code-role">店员邀请码</text>
-						<text class="code-value">{{ inviteCodes.staffCode || '---' }}</text>
+						<text class="code-val">{{ inviteCodes.staffCode || '---' }}</text>
 					</view>
-					<button class="copy-btn" @click="copyCode(inviteCodes.staffCode)">复制</button>
+					<text class="action-link" @click="copyCode(inviteCodes.staffCode)">复制</text>
 				</view>
 			</view>
-			<button class="refresh-btn" @click="loadInviteCodes">
-				<uni-icons type="refresh" size="18" color="#667eea"></uni-icons>
-				<text>刷新邀请码</text>
-			</button>
+			<view class="refresh-row" @click="loadInviteCodes">
+				<uni-icons type="refresh" size="16" color="#4F46E5"></uni-icons>
+				<text class="refresh-text">刷新邀请码</text>
+			</view>
 		</view>
 
-		<!-- 员工管理（店长和经理） -->
-		<view class="section-card" v-if="userInfo && (userInfo.role === 'store_manager' || userInfo.role === 'manager')">
-			<view class="card-header">
-				<view class="card-title-row">
-					<uni-icons type="staff" size="20" color="#667eea"></uni-icons>
-					<text class="card-title">员工管理</text>
+		<!-- ===== 员工管理 ===== -->
+		<view class="info-card" v-if="userInfo && (userInfo.role === 'store_manager' || userInfo.role === 'manager')">
+			<view class="card-head">
+				<view class="card-head-left">
+					<uni-icons type="staff" size="18" color="#4F46E5"></uni-icons>
+					<text class="card-head-title">员工管理</text>
 				</view>
 			</view>
 
-			<!-- 经理列表（仅店长可见） -->
-			<view class="staff-section" v-if="userInfo && userInfo.role === 'store_manager'">
-				<view class="section-title">
-					<text class="title-text">经理</text>
-					<text class="title-count">{{ managers.length }}人</text>
+			<!-- 经理列表（仅店长） -->
+			<view class="staff-group" v-if="userInfo && userInfo.role === 'store_manager'">
+				<view class="staff-group-head">
+					<text class="staff-group-title">经理</text>
+					<text class="staff-group-count">{{ managers.length }}人</text>
 				</view>
 				<view class="staff-list" v-if="managers.length > 0">
-					<view v-for="manager in managers" :key="manager.id" class="staff-item">
-						<view class="staff-avatar"><text class="staff-avatar-text">{{ manager.username.charAt(0).toUpperCase() }}</text></view>
-						<text class="staff-name">{{ manager.username }}</text>
-						<button class="delete-btn" @click="deleteStaff(manager.id, manager.username)">删除</button>
+					<view v-for="manager in managers" :key="manager.id" class="staff-row">
+						<view class="staff-avatar-sm">
+							<text class="staff-avatar-letter">{{ manager.username.charAt(0).toUpperCase() }}</text>
+						</view>
+						<text class="staff-row-name">{{ manager.username }}</text>
+						<text class="action-link danger-link" @click="deleteStaff(manager.id, manager.username)">删除</text>
 					</view>
 				</view>
-				<view class="empty-list" v-else>
-					<text>暂无经理</text>
-				</view>
+				<view class="staff-empty" v-else><text>暂无经理</text></view>
 			</view>
 
 			<!-- 店员列表 -->
-			<view class="staff-section">
-				<view class="section-title">
-					<text class="title-text">店员</text>
-					<text class="title-count">{{ staffs.length }}人</text>
+			<view class="staff-group">
+				<view class="staff-group-head">
+					<text class="staff-group-title">店员</text>
+					<text class="staff-group-count">{{ staffs.length }}人</text>
 				</view>
 				<view class="staff-list" v-if="staffs.length > 0">
-					<view v-for="staff in staffs" :key="staff.id" class="staff-item">
-						<view class="staff-avatar"><text class="staff-avatar-text">{{ staff.username.charAt(0).toUpperCase() }}</text></view>
-						<text class="staff-name">{{ staff.username }}</text>
-						<button class="delete-btn" @click="deleteStaff(staff.id, staff.username)">删除</button>
+					<view v-for="staff in staffs" :key="staff.id" class="staff-row">
+						<view class="staff-avatar-sm">
+							<text class="staff-avatar-letter">{{ staff.username.charAt(0).toUpperCase() }}</text>
+						</view>
+						<text class="staff-row-name">{{ staff.username }}</text>
+						<text class="action-link danger-link" @click="deleteStaff(staff.id, staff.username)">删除</text>
 					</view>
 				</view>
-				<view class="empty-list" v-else>
-					<text>暂无店员</text>
-				</view>
+				<view class="staff-empty" v-else><text>暂无店员</text></view>
 			</view>
 
-			<button class="refresh-btn" @click="loadStaffList">
-				<uni-icons type="refresh" size="18" color="#667eea"></uni-icons>
-				<text>刷新列表</text>
-			</button>
+			<view class="refresh-row" @click="loadStaffList">
+				<uni-icons type="refresh" size="16" color="#4F46E5"></uni-icons>
+				<text class="refresh-text">刷新列表</text>
+			</view>
 		</view>
 
-		<!-- 退出登录 -->
-		<button class="logout-btn" @click="logout">
-			<uni-icons type="undo" size="20" color="#ffffff"></uni-icons>
+		<!-- ===== 退出登录 ===== -->
+		<view class="logout-btn" @click="logout">
+			<uni-icons type="undo" size="18" color="#EF4444"></uni-icons>
 			<text>退出登录</text>
-		</button>
+		</view>
 
-		<!-- 注销账号 -->
-		<button class="delete-account-btn" @click="deleteAccount">
-			<uni-icons type="trash" size="20" color="#999"></uni-icons>
+		<!-- ===== 注销账号 ===== -->
+		<view class="delete-account-btn" @click="deleteAccount">
+			<uni-icons type="trash" size="16" color="#9CA3AF"></uni-icons>
 			<text>注销账号</text>
-		</button>
+		</view>
 
-		<!-- 自定义TabBar -->
+		<!-- ===== 底部导航 ===== -->
 		<tab-bar :currentIndex="4"></tab-bar>
 	</view>
 </template>
@@ -254,7 +263,7 @@ export default {
 					const data = res.result.data;
 					this.inviteCodes = {
 						managerCode: (data.managerCodes && data.managerCodes[0]) || '',
-					staffCode: (data.staffCodes && data.staffCodes[0]) || ''
+						staffCode: (data.staffCodes && data.staffCodes[0]) || ''
 					};
 				}
 			} catch (err) {
@@ -298,7 +307,7 @@ export default {
 		deleteStaff(staffId, staffName) {
 			uni.showModal({
 				title: '确认删除',
-				content: `确定要删除员工 "${staffName}" 吗？`,
+				content: '确定要删除员工 "' + staffName + '" 吗？',
 				confirmColor: '#ff6b6b',
 				success: async (res) => {
 					if (res.confirm) {
@@ -375,352 +384,394 @@ export default {
 };
 </script>
 
-<style>
-.content {
+<style lang="scss">
+/* ============================================================
+   1. 页面基底
+   ============================================================ */
+.page {
 	min-height: 100vh;
-	background: #f5f6fa;
-	padding: 30rpx;
-	padding-bottom: 160rpx;
+	background: #FAFAFA;
+	padding: 0 24rpx;
+	padding-bottom: 180rpx;
+	position: relative;
 }
 
-/* 用户信息卡片 */
-.user-card {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	border-radius: 24rpx;
-	padding: 50rpx 40rpx;
-	margin-bottom: 30rpx;
+/* 顶部淡蓝→白微弱渐变 */
+.top-gradient {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 320rpx;
+	background: linear-gradient(180deg,
+		rgba(79, 70, 229, 0.03) 0%,
+		rgba(99, 102, 241, 0.01) 40%,
+		rgba(255, 255, 255, 0) 100%
+	);
+	pointer-events: none;
+	z-index: 0;
+}
+
+.status-bar {
+	width: 100%;
+	position: relative;
+	z-index: 1;
+}
+
+/* ============================================================
+   2. 用户信息区
+   ============================================================ */
+.user-section {
+	position: relative;
+	z-index: 1;
 	display: flex;
 	align-items: center;
-	gap: 30rpx;
-	box-shadow: 0 10rpx 40rpx rgba(102, 126, 234, 0.3);
+	gap: 24rpx;
+	padding: 24rpx 8rpx 28rpx;
 }
 
 .user-avatar {
-	width: 120rpx;
-	height: 120rpx;
-	background: rgba(255, 255, 255, 0.2);
+	width: 104rpx;
+	height: 104rpx;
 	border-radius: 50%;
+	background: linear-gradient(135deg, #4F46E5, #818CF8);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border: 4rpx solid rgba(255, 255, 255, 0.3);
+	flex-shrink: 0;
+	box-shadow: 0 6rpx 20rpx rgba(79, 70, 229, 0.18);
 }
 
 .avatar-text {
-	font-size: 56rpx;
-	font-weight: bold;
-	color: #ffffff;
+	font-size: 44rpx;
+	font-weight: 700;
+	color: #FFFFFF;
 }
 
-.user-info {
-	flex: 1;
+.user-body {
+	display: flex;
+	flex-direction: column;
+	gap: 10rpx;
 }
 
 .username {
-	display: block;
 	font-size: 40rpx;
-	font-weight: bold;
-	color: #ffffff;
-	margin-bottom: 15rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
-.role-badge {
-	display: inline-block;
-	padding: 8rpx 24rpx;
+/* 角色胶囊 — 淡红底深红字 */
+.role-capsule {
+	display: inline-flex;
+	align-self: flex-start;
+	padding: 6rpx 20rpx;
 	border-radius: 20rpx;
-	font-size: 24rpx;
-	font-weight: 500;
 }
 
-.role-badge.store_manager {
-	background: rgba(255, 107, 107, 0.9);
-	color: #fff;
+.role-capsule.store_manager {
+	background: rgba(239, 68, 68, 0.08);
+	.role-text { color: #DC2626; }
 }
 
-.role-badge.manager {
-	background: rgba(78, 205, 196, 0.9);
-	color: #fff;
+.role-capsule.manager {
+	background: rgba(16, 185, 129, 0.08);
+	.role-text { color: #059669; }
 }
 
-.role-badge.staff {
-	background: rgba(69, 183, 209, 0.9);
-	color: #fff;
+.role-capsule.staff {
+	background: rgba(79, 70, 229, 0.06);
+	.role-text { color: #4F46E5; }
 }
 
-/* 店铺信息卡片 */
-.shop-card {
-	background: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	margin-bottom: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+.role-text {
+	font-size: 22rpx;
+	font-weight: 600;
 }
 
-.card-header {
-	margin-bottom: 25rpx;
+/* ============================================================
+   3. 通用信息卡片
+   ============================================================ */
+.info-card {
+	background: #FFFFFF;
+	border-radius: 16px;
+	padding: 28rpx;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
+	margin-bottom: 14px;
+	position: relative;
+	z-index: 1;
 }
 
-.card-title-row {
-	display: flex;
-	align-items: center;
-	gap: 14rpx;
-}
-
-.card-title {
-	font-size: 32rpx;
-	font-weight: bold;
-	color: #333;
-}
-
-.card-subtitle {
-	display: block;
-	font-size: 24rpx;
-	color: #999;
-	margin-top: 8rpx;
-}
-
-.shop-info-list {
-	display: flex;
-	flex-direction: column;
-	gap: 20rpx;
-}
-
-.info-item {
+.card-head {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 20rpx 0;
-	border-bottom: 2rpx solid #f0f1f5;
+	margin-bottom: 22rpx;
+	padding-bottom: 18rpx;
+	border-bottom: 1px solid #F3F4F6;
 }
 
-.info-item:last-child {
-	border-bottom: none;
+.card-head-left {
+	display: flex;
+	align-items: center;
+	gap: 10rpx;
+}
+
+.card-head-title {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #1F2937;
+}
+
+.card-head-sub {
+	font-size: 22rpx;
+	color: #9CA3AF;
+}
+
+/* 列表 */
+.info-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.info-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18rpx 0;
+
+	&:not(:last-child) {
+		border-bottom: 1px solid #F9FAFB;
+	}
 }
 
 .info-label {
-	font-size: 28rpx;
-	color: #666;
+	font-size: 26rpx;
+	color: #6B7280;
 }
 
 .info-value-row {
 	display: flex;
 	align-items: center;
-	gap: 15rpx;
+	gap: 16rpx;
 }
 
 .info-value {
-	font-size: 30rpx;
-	font-weight: bold;
-	color: #333;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #1F2937;
+
+	&.mono {
+		font-family: monospace;
+		color: #4F46E5;
+	}
 }
 
-.info-value.id {
-	font-family: monospace;
-	color: #667eea;
-}
-
-.edit-btn {
-	padding: 10rpx 25rpx;
-	margin: 0;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	color: #ffffff;
+/* 操作文字按钮 */
+.action-link {
 	font-size: 24rpx;
-	border-radius: 25rpx;
+	font-weight: 500;
+	color: #4F46E5;
+	padding: 4rpx 0;
+
+	&:active {
+		opacity: 0.6;
+	}
 }
 
-/* 功能卡片 */
-.section-card {
-	background: #ffffff;
-	border-radius: 20rpx;
-	padding: 30rpx;
-	margin-bottom: 30rpx;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+.edit-link {
+	color: #4F46E5;
 }
 
-/* 邀请码列表 */
-.codes-list {
+.danger-link {
+	color: #F87171;
+}
+
+/* ============================================================
+   4. 邀请码
+   ============================================================ */
+.code-list {
 	display: flex;
 	flex-direction: column;
-	gap: 20rpx;
-	margin-bottom: 25rpx;
+	gap: 16rpx;
+	margin-bottom: 20rpx;
 }
 
-.code-item {
+.code-row {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background: #f5f6fa;
-	border-radius: 16rpx;
-	padding: 25rpx;
+	background: #F9FAFB;
+	border-radius: 12rpx;
+	padding: 22rpx 24rpx;
 }
 
 .code-info {
 	display: flex;
 	flex-direction: column;
-	gap: 10rpx;
+	gap: 6rpx;
 }
 
 .code-role {
-	font-size: 24rpx;
-	color: #666;
+	font-size: 22rpx;
+	color: #6B7280;
 }
 
-.code-value {
-	font-size: 36rpx;
-	font-weight: bold;
-	color: #333;
+.code-val {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1F2937;
 	font-family: monospace;
 	letter-spacing: 2rpx;
 }
 
-.copy-btn {
-	padding: 15rpx 30rpx;
-	margin: 0;
-	background: #e8eaf6;
-	color: #667eea;
-	font-size: 26rpx;
-	border-radius: 30rpx;
-	font-weight: 500;
+/* ============================================================
+   5. 员工管理
+   ============================================================ */
+.staff-group {
+	margin-bottom: 24rpx;
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
 }
 
-/* 员工管理 */
-.staff-section {
-	margin-bottom: 30rpx;
-}
-
-.staff-section:last-of-type {
-	margin-bottom: 0;
-}
-
-.section-title {
+.staff-group-head {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 20rpx;
+	margin-bottom: 16rpx;
 }
 
-.title-text {
-	font-size: 30rpx;
-	font-weight: bold;
-	color: #333;
+.staff-group-title {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #1F2937;
 }
 
-.title-count {
-	font-size: 24rpx;
-	color: #667eea;
-	background: #e8eaf6;
-	padding: 6rpx 16rpx;
-	border-radius: 15rpx;
+.staff-group-count {
+	font-size: 22rpx;
+	color: #9CA3AF;
 }
 
 .staff-list {
 	display: flex;
 	flex-direction: column;
-	gap: 15rpx;
+	gap: 10rpx;
 }
 
-.staff-item {
+.staff-row {
 	display: flex;
 	align-items: center;
-	background: #f5f6fa;
-	border-radius: 16rpx;
-	padding: 20rpx 25rpx;
+	background: #F9FAFB;
+	border-radius: 12rpx;
+	padding: 18rpx 20rpx;
 }
 
-.staff-avatar {
-	width: 60rpx;
-	height: 60rpx;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.staff-avatar-sm {
+	width: 56rpx;
+	height: 56rpx;
 	border-radius: 50%;
+	background: linear-gradient(135deg, #4F46E5, #818CF8);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-right: 20rpx;
+	margin-right: 18rpx;
 }
 
-.staff-avatar-text {
-	font-size: 26rpx;
-	font-weight: bold;
-	color: #ffffff;
+.staff-avatar-letter {
+	font-size: 24rpx;
+	font-weight: 700;
+	color: #FFFFFF;
 }
 
-.staff-name {
+.staff-row-name {
 	flex: 1;
-	font-size: 30rpx;
-	color: #333;
+	font-size: 28rpx;
+	font-weight: 500;
+	color: #1F2937;
+}
+
+.staff-empty {
+	text-align: center;
+	padding: 36rpx;
+	color: #9CA3AF;
+	font-size: 26rpx;
+	background: #F9FAFB;
+	border-radius: 12rpx;
+}
+
+/* 刷新行 */
+.refresh-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8rpx;
+	padding: 18rpx 0 4rpx;
+	border-radius: 10rpx;
+
+	&:active {
+		background: #F9FAFB;
+	}
+}
+
+.refresh-text {
+	font-size: 24rpx;
+	color: #4F46E5;
 	font-weight: 500;
 }
 
-.delete-btn {
-	padding: 12rpx 25rpx;
-	margin: 0;
-	background: #ffebee;
-	color: #f44336;
-	font-size: 24rpx;
-	border-radius: 25rpx;
-}
-
-.empty-list {
-	text-align: center;
-	padding: 40rpx;
-	color: #999;
-	font-size: 28rpx;
-	background: #f5f6fa;
-	border-radius: 16rpx;
-}
-
-/* 刷新按钮 */
-.refresh-btn {
-	width: 100%;
-	height: 80rpx;
-	line-height: 80rpx;
-	background: #f0f1f5;
-	color: #666;
-	font-size: 28rpx;
-	border-radius: 12rpx;
-	margin-top: 25rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 10rpx;
-}
-
-/* 注销账号 */
-.delete-account-btn {
-	width: 100%;
-	height: 90rpx;
-	line-height: 90rpx;
-	background: #f5f6fa;
-	color: #999;
-	font-size: 30rpx;
-	border: 2rpx solid #e0e0e0;
-	border-radius: 50rpx;
-	margin-top: 20rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 10rpx;
-}
-
-.delete-account-btn::after {
-	border: none;
-}
-
-/* 退出登录 */
+/* ============================================================
+   6. 退出登录 — 柔和珊瑚红
+   ============================================================ */
 .logout-btn {
 	width: 100%;
-	height: 100rpx;
-	line-height: 100rpx;
-	background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-	color: #ffffff;
-	font-size: 32rpx;
-	font-weight: bold;
-	border-radius: 50rpx;
-	margin-top: 20rpx;
+	height: 96rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 15rpx;
-	box-shadow: 0 4rpx 20rpx rgba(255, 107, 107, 0.3);
+	gap: 12rpx;
+	background: rgba(239, 68, 68, 0.06);
+	border-radius: 48rpx;
+	margin-top: 28rpx;
+	position: relative;
+	z-index: 1;
+	border: none;
+
+	text {
+		font-size: 30rpx;
+		font-weight: 600;
+		color: #EF4444;
+	}
+
+	&:active {
+		background: rgba(239, 68, 68, 0.12);
+	}
+}
+
+/* ============================================================
+   7. 注销账号
+   ============================================================ */
+.delete-account-btn {
+	width: 100%;
+	height: 88rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10rpx;
+	background: transparent;
+	border: 1px solid #E5E7EB;
+	border-radius: 44rpx;
+	margin-top: 18rpx;
+	position: relative;
+	z-index: 1;
+
+	text {
+		font-size: 28rpx;
+		color: #9CA3AF;
+	}
+
+	&:active {
+		background: #F9FAFB;
+	}
 }
 </style>
